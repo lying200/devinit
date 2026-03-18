@@ -1,0 +1,11 @@
+{ pkgs, ... }:
+
+{
+  packages = [
+    {% for tool in project_ctx.tools %}
+    pkgs.{{ tool }}
+    {% endfor %}
+  ];
+
+  languages.{{ project_ctx.language }} = true;
+}

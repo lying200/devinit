@@ -1,0 +1,28 @@
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# Nix build artifacts
+result
+result-*
+
+# pre-commit
+.pre-commit-config.yaml
+
+# Added by cargo
+
+/target
+
+# IDEs and editors
+.vscode/
+.idea/
+*.iml
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
