@@ -13,9 +13,18 @@ pub struct ProjectContext {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "lowercase", tag = "name")]
 pub enum Language {
-    Rust,
+    Rust {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        channel: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        version: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        components: Option<Vec<String>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        targets: Option<Vec<String>>,
+    },
     Python,
     Go,
     Java,

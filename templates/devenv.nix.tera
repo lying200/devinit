@@ -7,5 +7,33 @@
     {% endfor %}
   ];
 
-  languages.{{ project_ctx.language }} = true;
+  {% if project_ctx.language.name == "rust" %}
+  languages.rust = {
+    enable = true;
+
+    {% if project_ctx.language.channel is defined %}
+    channel = "{{ project_ctx.language.channel }}";
+    {% endif %}
+
+    {% if project_ctx.language.version is defined %}
+    version = "{{ project_ctx.language.version }}";
+    {% endif %}
+
+    {% if project_ctx.language.components is defined %}
+    components = [
+      {% for component in project_ctx.language.components %}
+      "{{ component }}"
+      {% endfor %}
+    ];
+    {% endif %}
+
+    {% if project_ctx.language.targets is defined %}
+    targets = [
+      {% for target in project_ctx.language.targets %}
+      "{{ target }}"
+      {% endfor %}
+    ];
+    {% endif %}
+  };
+  {% endif %}
 }
