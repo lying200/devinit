@@ -1,4 +1,8 @@
-use devinit::generator::render_devenv;
+use devinit::generator::{
+    render_devenv_nix,
+    render_devenv_yaml,
+    render_envrc,
+};
 use devinit::schema::{Language, ProjectContext};
 
 fn nomalize_whitespace(s: &str) -> String {
@@ -19,7 +23,7 @@ fn test_render_rust_base() {
         services: vec![],
         tools: vec!["git".to_string()],
     };
-    let devenv_conf = render_devenv(&project_ctx);
+    let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
         { pkgs, ... }:
 
@@ -53,7 +57,7 @@ fn test_render_rust_with_channel() {
         services: vec![],
         tools: vec!["git".to_string()],
     };
-    let devenv_conf = render_devenv(&project_ctx);
+    let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
         { pkgs, ... }:
 
@@ -88,7 +92,7 @@ fn test_render_rust_with_version() {
         services: vec![],
         tools: vec!["git".to_string()],
     };
-    let devenv_conf = render_devenv(&project_ctx);
+    let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
         { pkgs, ... }:
 
@@ -123,7 +127,7 @@ fn test_render_rust_with_components() {
         services: vec![],
         tools: vec!["git".to_string()],
     };
-    let devenv_conf = render_devenv(&project_ctx);
+    let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
         { pkgs, ... }:
 
@@ -160,7 +164,7 @@ fn test_render_rust_with_targets() {
         services: vec![],
         tools: vec!["git".to_string()],
     };
-    let devenv_conf = render_devenv(&project_ctx);
+    let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
         { pkgs, ... }:
 
@@ -180,5 +184,54 @@ fn test_render_rust_with_targets() {
     assert_eq!(
         nomalize_whitespace(expected),
         nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_devenv_yaml() {
+    let project_ctx = ProjectContext {
+        project_name: "test_project".to_string(),
+        project_path: "/path/to/test_project".to_string(),
+        language: Language::Rust {
+            channel: None,
+            version: None,
+            components: None,
+            targets: None,
+        },
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_yaml(&project_ctx);
+    let expected = r#"
+        inputs:
+          nixpkgs:
+            url: github:cachix/devenv-nixpkgs/rolling
+          rust-overlay:
+            url: github:oxalica/rust-overlay
+            inputs:
+              nixpkgs:
+                follows: nixpkgs
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_envrc() {
+    let envrc = render_envrc();
+    let expected = r#"
+        #!/usr/bin/env bash
+        
+        eval "$(devenv direnvrc)"
+        
+        # You can pass flags to the devenv command
+        # For example: use devenv --impure --option services.postgres.enable:bool true
+        use devenv
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&envrc)
     )
 }
