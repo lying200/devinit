@@ -2,6 +2,7 @@ use clap::Parser;
 use devinit::{
     cli::{Cli, LanguageChoice},
     generator::{plan_files, write_files},
+    prompt::prompt_rust_config,
     schema::{Language, ProjectContext},
 };
 use dialoguer::{Select, theme::ColorfulTheme};
@@ -30,12 +31,7 @@ fn main() {
     };
 
     let language = match lang_choice {
-        LanguageChoice::Rust => Language::Rust {
-            channel: None,
-            version: None,
-            components: None,
-            targets: None,
-        },
+        LanguageChoice::Rust => prompt_rust_config(),
         LanguageChoice::Python => Language::Python,
         LanguageChoice::Go => Language::Go,
         LanguageChoice::Java => Language::Java,
@@ -55,4 +51,5 @@ fn main() {
         std::process::exit(1);
     }
     println!("devenv init success!");
+    println!("use \"direnv allow\" to activate the environment.")
 }
