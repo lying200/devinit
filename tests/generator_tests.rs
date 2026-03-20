@@ -12,8 +12,6 @@ fn nomalize_whitespace(s: &str) -> String {
 #[test]
 fn test_render_rust_base() {
     let project_ctx = ProjectContext {
-        project_name: "test_project".to_string(),
-        project_path: "/path/to/test_project".to_string(),
         language: Language::Rust {
             channel: None,
             version: None,
@@ -46,8 +44,6 @@ fn test_render_rust_base() {
 #[test]
 fn test_render_rust_with_channel() {
     let project_ctx = ProjectContext {
-        project_name: "test_project".to_string(),
-        project_path: "/path/to/test_project".to_string(),
         language: Language::Rust {
             channel: Some("stable".to_string()),
             version: None,
@@ -81,8 +77,6 @@ fn test_render_rust_with_channel() {
 #[test]
 fn test_render_rust_with_version() {
     let project_ctx = ProjectContext {
-        project_name: "test_project".to_string(),
-        project_path: "/path/to/test_project".to_string(),
         language: Language::Rust {
             channel: None,
             version: Some("1.81.0".to_string()),
@@ -116,8 +110,6 @@ fn test_render_rust_with_version() {
 #[test]
 fn test_render_rust_with_components() {
     let project_ctx = ProjectContext {
-        project_name: "test_project".to_string(),
-        project_path: "/path/to/test_project".to_string(),
         language: Language::Rust {
             channel: None,
             version: None,
@@ -153,8 +145,6 @@ fn test_render_rust_with_components() {
 #[test]
 fn test_render_rust_with_targets() {
     let project_ctx = ProjectContext {
-        project_name: "test_project".to_string(),
-        project_path: "/path/to/test_project".to_string(),
         language: Language::Rust {
             channel: None,
             version: None,
@@ -190,8 +180,6 @@ fn test_render_rust_with_targets() {
 #[test]
 fn test_render_devenv_yaml() {
     let project_ctx = ProjectContext {
-        project_name: "test_project".to_string(),
-        project_path: "/path/to/test_project".to_string(),
         language: Language::Rust {
             channel: None,
             version: None,

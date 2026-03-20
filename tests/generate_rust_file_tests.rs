@@ -3,8 +3,6 @@ use devinit::{generator::plan_files, schema::ProjectContext};
 #[test]
 fn test_plan_files_for_rust_project() {
     let ctx = ProjectContext {
-        project_name: "test_project".to_string(),
-        project_path: "/path/to/test_project".to_string(),
         language: devinit::schema::Language::Rust {
             channel: Some("stable".to_string()),
             version: Some("1.81.0".to_string()),

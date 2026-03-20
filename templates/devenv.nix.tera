@@ -2,38 +2,38 @@
 
 {
   packages = [
-    {% for tool in project_ctx.tools %}
+    {%- for tool in project_ctx.tools %}
     pkgs.{{ tool }}
-    {% endfor %}
+    {%- endfor %}
   ];
 
-  {% if project_ctx.language.name == "rust" %}
+  {% if project_ctx.language.name == "rust" -%}
   languages.rust = {
     enable = true;
 
-    {% if project_ctx.language.channel is defined %}
+    {%- if project_ctx.language.channel is defined %}
     channel = "{{ project_ctx.language.channel }}";
-    {% endif %}
+    {%- endif %}
 
-    {% if project_ctx.language.version is defined %}
+    {%- if project_ctx.language.version is defined %}
     version = "{{ project_ctx.language.version }}";
-    {% endif %}
+    {%- endif %}
 
-    {% if project_ctx.language.components is defined %}
+    {%- if project_ctx.language.components is defined %}
     components = [
-      {% for component in project_ctx.language.components %}
+      {%- for component in project_ctx.language.components %}
       "{{ component }}"
-      {% endfor %}
+      {%- endfor %}
     ];
-    {% endif %}
+    {%- endif %}
 
-    {% if project_ctx.language.targets is defined %}
+    {%- if project_ctx.language.targets is defined %}
     targets = [
-      {% for target in project_ctx.language.targets %}
+      {%- for target in project_ctx.language.targets %}
       "{{ target }}"
-      {% endfor %}
+      {%- endfor %}
     ];
-    {% endif %}
+    {%- endif %}
   };
-  {% endif %}
+  {%- endif %}
 }
