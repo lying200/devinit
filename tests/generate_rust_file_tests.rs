@@ -58,7 +58,11 @@ fn test_plan_files_for_javascript_project() {
 
     let generated_files = plan_files(&ctx);
 
-    assert_eq!(generated_files.len(), 3, "JavaScript 项目应该生成 3 个基础配置文件");
+    assert_eq!(
+        generated_files.len(),
+        3,
+        "JavaScript 项目应该生成 3 个基础配置文件"
+    );
 
     let filenames: Vec<&str> = generated_files
         .iter()
@@ -93,7 +97,11 @@ fn test_plan_files_for_java_project() {
 
     let generated_files = plan_files(&ctx);
 
-    assert_eq!(generated_files.len(), 3, "Java 项目应该生成 3 个基础配置文件");
+    assert_eq!(
+        generated_files.len(),
+        3,
+        "Java 项目应该生成 3 个基础配置文件"
+    );
 
     let filenames: Vec<&str> = generated_files
         .iter()
@@ -164,7 +172,11 @@ fn test_plan_files_for_python_project() {
 
     let generated_files = plan_files(&ctx);
 
-    assert_eq!(generated_files.len(), 3, "Python 项目应该生成 3 个基础配置文件");
+    assert_eq!(
+        generated_files.len(),
+        3,
+        "Python 项目应该生成 3 个基础配置文件"
+    );
 
     let filenames: Vec<&str> = generated_files
         .iter()

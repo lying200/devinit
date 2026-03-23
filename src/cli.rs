@@ -9,7 +9,7 @@ pub struct Cli {
     pub lang: Option<LanguageChoice>,
 
     #[arg(default_value = ".")]
-    pub path: PathBuf
+    pub path: PathBuf,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]

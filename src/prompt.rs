@@ -1,6 +1,32 @@
 use dialoguer::{Confirm, Input, MultiSelect, Select, theme::ColorfulTheme};
 
+use crate::git_ignore::IgnoreMode;
 use crate::schema::Language;
+
+pub fn ignore_mode_from_selection(selection: usize) -> IgnoreMode {
+    match selection {
+        0 => IgnoreMode::None,
+        1 => IgnoreMode::GitIgnore,
+        2 => IgnoreMode::LocalExclude,
+        _ => unreachable!(),
+    }
+}
+
+pub fn prompt_ignore_mode() -> IgnoreMode {
+    let options = vec![
+        "Do nothing",
+        "Add to .gitignore",
+        "Add to local git exclude (.git/info/exclude, ignore devenv mechanism locally)",
+    ];
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("How to handle git ignore for devenv files?")
+        .default(0)
+        .items(&options)
+        .interact()
+        .expect("select err");
+
+    ignore_mode_from_selection(selection)
+}
 
 pub fn prompt_rust_config() -> Language {
     let theme = ColorfulTheme::default();
