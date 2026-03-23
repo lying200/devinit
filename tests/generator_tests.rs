@@ -573,6 +573,156 @@ fn test_render_devenv_yaml_for_go_with_package_only() {
 }
 
 #[test]
+fn test_render_java_base() {
+    let project_ctx = ProjectContext {
+        language: Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.java = {
+            enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_java_with_jdk_package() {
+    let project_ctx = ProjectContext {
+        language: Language::Java {
+            jdk_package: Some("pkgs.jdk17".to_string()),
+            gradle_enable: None,
+            maven_enable: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.java = {
+            enable = true;
+            jdk.package = pkgs.jdk17;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_java_with_gradle() {
+    let project_ctx = ProjectContext {
+        language: Language::Java {
+            jdk_package: None,
+            gradle_enable: Some(true),
+            maven_enable: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.java = {
+            enable = true;
+            gradle.enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_java_with_maven() {
+    let project_ctx = ProjectContext {
+        language: Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: Some(true),
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.java = {
+            enable = true;
+            maven.enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_devenv_yaml_for_java() {
+    let project_ctx = ProjectContext {
+        language: Language::Java {
+            jdk_package: Some("pkgs.jdk17".to_string()),
+            gradle_enable: Some(true),
+            maven_enable: Some(true),
+        },
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_yaml(&project_ctx);
+    let expected = r#"
+        inputs:
+          nixpkgs:
+            url: github:cachix/devenv-nixpkgs/rolling
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
 fn test_render_envrc() {
     let envrc = render_envrc();
     let expected = r#"
