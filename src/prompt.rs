@@ -203,3 +203,52 @@ pub fn prompt_go_config() -> Language {
 
     Language::Go { version, package }
 }
+
+pub fn prompt_java_config() -> Language {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("use default java config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: None,
+        };
+    }
+
+    let jdk_package_input: String = Input::with_theme(&theme)
+        .with_prompt("jdk package")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let jdk_package = if jdk_package_input.is_empty() {
+        None
+    } else {
+        Some(jdk_package_input.trim().to_string())
+    };
+
+    let gradle_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable gradle?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+
+    let maven_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable maven?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+
+    Language::Java {
+        jdk_package,
+        gradle_enable,
+        maven_enable,
+    }
+}

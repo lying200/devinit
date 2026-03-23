@@ -76,4 +76,22 @@
     {%- endif %}
   };
   {%- endif %}
+
+  {% if project_ctx.language.name == "java" -%}
+  languages.java = {
+    enable = true;
+
+    {%- if project_ctx.language.jdk_package is defined %}
+    jdk.package = {{ project_ctx.language.jdk_package }};
+    {%- endif %}
+
+    {%- if project_ctx.language.gradle_enable is defined %}
+    gradle.enable = {{ project_ctx.language.gradle_enable }};
+    {%- endif %}
+
+    {%- if project_ctx.language.maven_enable is defined %}
+    maven.enable = {{ project_ctx.language.maven_enable }};
+    {%- endif %}
+  };
+  {%- endif %}
 }

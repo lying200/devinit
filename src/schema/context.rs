@@ -41,7 +41,14 @@ pub enum Language {
         #[serde(skip_serializing_if = "Option::is_none")]
         package: Option<String>,
     },
-    Java,
+    Java {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        jdk_package: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        gradle_enable: Option<bool>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        maven_enable: Option<bool>,
+    },
     Nodejs,
 }
 
