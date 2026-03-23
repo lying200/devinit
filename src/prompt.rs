@@ -263,11 +263,8 @@ pub fn prompt_javascript_config() -> Language {
     if use_default {
         return Language::JavaScript {
             package: None,
-            npm_enable: None,
-            pnpm_enable: None,
-            yarn_enable: None,
+            package_manager: None,
             corepack_enable: None,
-            bun_enable: None,
         };
     }
 
@@ -282,27 +279,19 @@ pub fn prompt_javascript_config() -> Language {
         Some(package_input.trim().to_string())
     };
 
-    let npm_enable = Some(
-        Confirm::with_theme(&theme)
-            .with_prompt("enable npm?")
-            .default(false)
-            .interact()
-            .expect("interact err exit"),
-    );
-    let pnpm_enable = Some(
-        Confirm::with_theme(&theme)
-            .with_prompt("enable pnpm?")
-            .default(false)
-            .interact()
-            .expect("interact err exit"),
-    );
-    let yarn_enable = Some(
-        Confirm::with_theme(&theme)
-            .with_prompt("enable yarn?")
-            .default(false)
-            .interact()
-            .expect("interact err exit"),
-    );
+    let package_managers = vec!["none", "npm", "pnpm", "yarn", "bun"];
+    let package_manager_idx = Select::with_theme(&theme)
+        .with_prompt("package manager")
+        .default(0)
+        .items(&package_managers)
+        .interact()
+        .expect("interact err exit");
+    let package_manager = if package_manager_idx == 0 {
+        None
+    } else {
+        Some(package_managers[package_manager_idx].to_string())
+    };
+
     let corepack_enable = Some(
         Confirm::with_theme(&theme)
             .with_prompt("enable corepack?")
@@ -310,20 +299,10 @@ pub fn prompt_javascript_config() -> Language {
             .interact()
             .expect("interact err exit"),
     );
-    let bun_enable = Some(
-        Confirm::with_theme(&theme)
-            .with_prompt("enable bun?")
-            .default(false)
-            .interact()
-            .expect("interact err exit"),
-    );
 
     Language::JavaScript {
         package,
-        npm_enable,
-        pnpm_enable,
-        yarn_enable,
+        package_manager,
         corepack_enable,
-        bun_enable,
     }
 }

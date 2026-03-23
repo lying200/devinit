@@ -49,11 +49,8 @@ fn test_plan_files_for_javascript_project() {
     let ctx = ProjectContext {
         language: devinit::schema::Language::JavaScript {
             package: Some("pkgs.nodejs_22".to_string()),
-            npm_enable: Some(true),
-            pnpm_enable: Some(true),
-            yarn_enable: Some(true),
+            package_manager: Some("pnpm".to_string()),
             corepack_enable: Some(true),
-            bun_enable: Some(true),
         },
         services: Vec::new(),
         tools: vec!["git".to_string()],

@@ -54,15 +54,9 @@ pub enum Language {
         #[serde(skip_serializing_if = "Option::is_none")]
         package: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        npm_enable: Option<bool>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pnpm_enable: Option<bool>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        yarn_enable: Option<bool>,
+        package_manager: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
         corepack_enable: Option<bool>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        bun_enable: Option<bool>,
     },
 }
 

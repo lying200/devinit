@@ -727,11 +727,8 @@ fn test_render_javascript_base() {
     let project_ctx = ProjectContext {
         language: Language::JavaScript {
             package: None,
-            npm_enable: None,
-            pnpm_enable: None,
-            yarn_enable: None,
+            package_manager: None,
             corepack_enable: None,
-            bun_enable: None,
         },
         services: vec![],
         tools: vec!["git".to_string()],
@@ -761,11 +758,8 @@ fn test_render_javascript_with_package() {
     let project_ctx = ProjectContext {
         language: Language::JavaScript {
             package: Some("pkgs.nodejs_22".to_string()),
-            npm_enable: None,
-            pnpm_enable: None,
-            yarn_enable: None,
+            package_manager: None,
             corepack_enable: None,
-            bun_enable: None,
         },
         services: vec![],
         tools: vec!["git".to_string()],
@@ -796,11 +790,8 @@ fn test_render_javascript_with_npm() {
     let project_ctx = ProjectContext {
         language: Language::JavaScript {
             package: None,
-            npm_enable: Some(true),
-            pnpm_enable: None,
-            yarn_enable: None,
+            package_manager: Some("npm".to_string()),
             corepack_enable: None,
-            bun_enable: None,
         },
         services: vec![],
         tools: vec!["git".to_string()],
@@ -831,11 +822,8 @@ fn test_render_javascript_with_pnpm() {
     let project_ctx = ProjectContext {
         language: Language::JavaScript {
             package: None,
-            npm_enable: None,
-            pnpm_enable: Some(true),
-            yarn_enable: None,
+            package_manager: Some("pnpm".to_string()),
             corepack_enable: None,
-            bun_enable: None,
         },
         services: vec![],
         tools: vec!["git".to_string()],
@@ -866,11 +854,8 @@ fn test_render_javascript_with_yarn() {
     let project_ctx = ProjectContext {
         language: Language::JavaScript {
             package: None,
-            npm_enable: None,
-            pnpm_enable: None,
-            yarn_enable: Some(true),
+            package_manager: Some("yarn".to_string()),
             corepack_enable: None,
-            bun_enable: None,
         },
         services: vec![],
         tools: vec!["git".to_string()],
@@ -901,11 +886,8 @@ fn test_render_javascript_with_corepack() {
     let project_ctx = ProjectContext {
         language: Language::JavaScript {
             package: None,
-            npm_enable: None,
-            pnpm_enable: None,
-            yarn_enable: None,
+            package_manager: None,
             corepack_enable: Some(true),
-            bun_enable: None,
         },
         services: vec![],
         tools: vec!["git".to_string()],
@@ -936,11 +918,8 @@ fn test_render_javascript_with_bun() {
     let project_ctx = ProjectContext {
         language: Language::JavaScript {
             package: None,
-            npm_enable: None,
-            pnpm_enable: None,
-            yarn_enable: None,
+            package_manager: Some("bun".to_string()),
             corepack_enable: None,
-            bun_enable: Some(true),
         },
         services: vec![],
         tools: vec!["git".to_string()],
@@ -971,11 +950,8 @@ fn test_render_devenv_yaml_for_javascript() {
     let project_ctx = ProjectContext {
         language: Language::JavaScript {
             package: Some("pkgs.nodejs_22".to_string()),
-            npm_enable: Some(true),
-            pnpm_enable: Some(true),
-            yarn_enable: Some(true),
+            package_manager: Some("pnpm".to_string()),
             corepack_enable: Some(true),
-            bun_enable: Some(true),
         },
         services: vec![],
         tools: vec![],

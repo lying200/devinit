@@ -103,24 +103,24 @@
     package = {{ project_ctx.language.package }};
     {%- endif %}
 
-    {%- if project_ctx.language.npm_enable is defined %}
-    npm.enable = {{ project_ctx.language.npm_enable }};
+    {%- if project_ctx.language.package_manager is defined and project_ctx.language.package_manager == "npm" %}
+    npm.enable = true;
     {%- endif %}
 
-    {%- if project_ctx.language.pnpm_enable is defined %}
-    pnpm.enable = {{ project_ctx.language.pnpm_enable }};
+    {%- if project_ctx.language.package_manager is defined and project_ctx.language.package_manager == "pnpm" %}
+    pnpm.enable = true;
     {%- endif %}
 
-    {%- if project_ctx.language.yarn_enable is defined %}
-    yarn.enable = {{ project_ctx.language.yarn_enable }};
+    {%- if project_ctx.language.package_manager is defined and project_ctx.language.package_manager == "yarn" %}
+    yarn.enable = true;
     {%- endif %}
 
     {%- if project_ctx.language.corepack_enable is defined %}
     corepack.enable = {{ project_ctx.language.corepack_enable }};
     {%- endif %}
 
-    {%- if project_ctx.language.bun_enable is defined %}
-    bun.enable = {{ project_ctx.language.bun_enable }};
+    {%- if project_ctx.language.package_manager is defined and project_ctx.language.package_manager == "bun" %}
+    bun.enable = true;
     {%- endif %}
   };
   {%- endif %}
