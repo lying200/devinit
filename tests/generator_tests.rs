@@ -1,8 +1,4 @@
-use devinit::generator::{
-    render_devenv_nix,
-    render_devenv_yaml,
-    render_envrc,
-};
+use devinit::generator::{render_devenv_nix, render_devenv_yaml, render_envrc};
 use devinit::schema::{Language, ProjectContext};
 
 fn nomalize_whitespace(s: &str) -> String {
@@ -980,8 +976,5 @@ fn test_render_envrc() {
         # For example: use devenv --impure --option services.postgres.enable:bool true
         use devenv
         "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&envrc)
-    )
+    assert_eq!(nomalize_whitespace(expected), nomalize_whitespace(&envrc))
 }
