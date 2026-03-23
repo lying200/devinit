@@ -207,6 +207,176 @@ fn test_render_devenv_yaml() {
 }
 
 #[test]
+fn test_render_python_base() {
+    let project_ctx = ProjectContext {
+        language: Language::Python {
+            version: None,
+            package: None,
+            uv_enable: None,
+            venv_enable: None,
+            venv_quiet: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.python = {
+            enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_python_with_version() {
+    let project_ctx = ProjectContext {
+        language: Language::Python {
+            version: Some("3.11".to_string()),
+            package: None,
+            uv_enable: None,
+            venv_enable: None,
+            venv_quiet: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.python = {
+            enable = true;
+            version = "3.11";
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_python_with_package() {
+    let project_ctx = ProjectContext {
+        language: Language::Python {
+            version: None,
+            package: Some("pkgs.python311".to_string()),
+            uv_enable: None,
+            venv_enable: None,
+            venv_quiet: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.python = {
+            enable = true;
+            package = pkgs.python311;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_python_with_uv() {
+    let project_ctx = ProjectContext {
+        language: Language::Python {
+            version: None,
+            package: None,
+            uv_enable: Some(true),
+            venv_enable: None,
+            venv_quiet: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.python = {
+            enable = true;
+            uv.enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_python_with_venv() {
+    let project_ctx = ProjectContext {
+        language: Language::Python {
+            version: None,
+            package: None,
+            uv_enable: None,
+            venv_enable: Some(true),
+            venv_quiet: Some(true),
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.python = {
+            enable = true;
+            venv.enable = true;
+            venv.quiet = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
 fn test_render_envrc() {
     let envrc = render_envrc();
     let expected = r#"

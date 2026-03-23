@@ -89,3 +89,78 @@ pub fn prompt_rust_config() -> Language {
         targets,
     }
 }
+
+pub fn prompt_python_config() -> Language {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("use default python config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Language::Python {
+            version: None,
+            package: None,
+            uv_enable: None,
+            venv_enable: None,
+            venv_quiet: None,
+        };
+    }
+
+    let version_input: String = Input::with_theme(&theme)
+        .with_prompt("version")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let version = if version_input.is_empty() {
+        None
+    } else {
+        Some(version_input.trim().to_string())
+    };
+
+    let package_input: String = Input::with_theme(&theme)
+        .with_prompt("package")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let package = if package_input.is_empty() {
+        None
+    } else {
+        Some(package_input.trim().to_string())
+    };
+
+    let uv_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable uv?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+
+    let venv_enabled = Confirm::with_theme(&theme)
+        .with_prompt("enable venv?")
+        .default(false)
+        .interact()
+        .expect("interact err exit");
+    let venv_enable = Some(venv_enabled);
+
+    let venv_quiet = if venv_enabled {
+        Some(
+            Confirm::with_theme(&theme)
+                .with_prompt("quiet?")
+                .default(false)
+                .interact()
+                .expect("interact err exit"),
+        )
+    } else {
+        None
+    };
+
+    Language::Python {
+        version,
+        package,
+        uv_enable,
+        venv_enable,
+        venv_quiet,
+    }
+}

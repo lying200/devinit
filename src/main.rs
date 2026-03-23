@@ -2,7 +2,7 @@ use clap::Parser;
 use devinit::{
     cli::{Cli, LanguageChoice},
     generator::{plan_files, write_files},
-    prompt::prompt_rust_config,
+    prompt::{prompt_python_config, prompt_rust_config},
     schema::{Language, ProjectContext},
 };
 use dialoguer::{Select, theme::ColorfulTheme};
@@ -32,7 +32,7 @@ fn main() {
 
     let language = match lang_choice {
         LanguageChoice::Rust => prompt_rust_config(),
-        LanguageChoice::Python => Language::Python,
+        LanguageChoice::Python => prompt_python_config(),
         LanguageChoice::Go => Language::Go,
         LanguageChoice::Java => Language::Java,
         LanguageChoice::Nodejs => Language::Nodejs,
