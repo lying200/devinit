@@ -18,5 +18,6 @@ pub enum LanguageChoice {
     Python,
     Go,
     Java,
-    Nodejs,
+    #[value(name = "javascript")]
+    JavaScript,
 }

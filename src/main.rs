@@ -2,8 +2,14 @@ use clap::Parser;
 use devinit::{
     cli::{Cli, LanguageChoice},
     generator::{plan_files, write_files},
-    prompt::{prompt_go_config, prompt_java_config, prompt_python_config, prompt_rust_config},
-    schema::{Language, ProjectContext},
+    prompt::{
+        prompt_go_config,
+        prompt_java_config,
+        prompt_javascript_config,
+        prompt_python_config,
+        prompt_rust_config,
+    },
+    schema::ProjectContext,
 };
 use dialoguer::{Select, theme::ColorfulTheme};
 
@@ -12,7 +18,7 @@ fn main() {
     let lang_choice = match cli.lang {
         Some(l) => l,
         None => {
-            let options = vec!["Rust", "Python", "Go", "Java", "Nodejs"];
+            let options = vec!["Rust", "Python", "Go", "Java", "JavaScript"];
             let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Select language")
                 .default(0)
@@ -24,7 +30,7 @@ fn main() {
                 1 => LanguageChoice::Python,
                 2 => LanguageChoice::Go,
                 3 => LanguageChoice::Java,
-                4 => LanguageChoice::Nodejs,
+                4 => LanguageChoice::JavaScript,
                 _ => unreachable!(),
             }
         }
@@ -35,7 +41,7 @@ fn main() {
         LanguageChoice::Python => prompt_python_config(),
         LanguageChoice::Go => prompt_go_config(),
         LanguageChoice::Java => prompt_java_config(),
-        LanguageChoice::Nodejs => Language::Nodejs,
+        LanguageChoice::JavaScript => prompt_javascript_config(),
     };
 
     let ctx = ProjectContext {

@@ -45,6 +45,41 @@ fn test_plan_files_for_rust_project() {
 }
 
 #[test]
+fn test_plan_files_for_javascript_project() {
+    let ctx = ProjectContext {
+        language: devinit::schema::Language::JavaScript {
+            package: Some("pkgs.nodejs_22".to_string()),
+            package_manager: Some("pnpm".to_string()),
+            corepack_enable: Some(true),
+        },
+        services: Vec::new(),
+        tools: vec!["git".to_string()],
+    };
+
+    let generated_files = plan_files(&ctx);
+
+    assert_eq!(generated_files.len(), 3, "JavaScript 项目应该生成 3 个基础配置文件");
+
+    let filenames: Vec<&str> = generated_files
+        .iter()
+        .map(|f| f.filename.as_str())
+        .collect();
+
+    assert!(filenames.contains(&"devenv.nix"), "缺少 devenv.nix");
+    assert!(filenames.contains(&"devenv.yaml"), "缺少 devenv.yaml");
+    assert!(filenames.contains(&".envrc"), "缺少 .envrc");
+
+    let nix_file = generated_files
+        .iter()
+        .find(|f| f.filename == "devenv.nix")
+        .unwrap();
+    assert!(
+        nix_file.content.contains("languages.javascript"),
+        "Nix 文件中应该包含 JavaScript 语言配置"
+    );
+}
+
+#[test]
 fn test_plan_files_for_java_project() {
     let ctx = ProjectContext {
         language: devinit::schema::Language::Java {

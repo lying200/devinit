@@ -723,6 +723,252 @@ fn test_render_devenv_yaml_for_java() {
 }
 
 #[test]
+fn test_render_javascript_base() {
+    let project_ctx = ProjectContext {
+        language: Language::JavaScript {
+            package: None,
+            package_manager: None,
+            corepack_enable: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.javascript = {
+            enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_javascript_with_package() {
+    let project_ctx = ProjectContext {
+        language: Language::JavaScript {
+            package: Some("pkgs.nodejs_22".to_string()),
+            package_manager: None,
+            corepack_enable: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.javascript = {
+            enable = true;
+            package = pkgs.nodejs_22;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_javascript_with_npm() {
+    let project_ctx = ProjectContext {
+        language: Language::JavaScript {
+            package: None,
+            package_manager: Some("npm".to_string()),
+            corepack_enable: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.javascript = {
+            enable = true;
+            npm.enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_javascript_with_pnpm() {
+    let project_ctx = ProjectContext {
+        language: Language::JavaScript {
+            package: None,
+            package_manager: Some("pnpm".to_string()),
+            corepack_enable: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.javascript = {
+            enable = true;
+            pnpm.enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_javascript_with_yarn() {
+    let project_ctx = ProjectContext {
+        language: Language::JavaScript {
+            package: None,
+            package_manager: Some("yarn".to_string()),
+            corepack_enable: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.javascript = {
+            enable = true;
+            yarn.enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_javascript_with_corepack() {
+    let project_ctx = ProjectContext {
+        language: Language::JavaScript {
+            package: None,
+            package_manager: None,
+            corepack_enable: Some(true),
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.javascript = {
+            enable = true;
+            corepack.enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_javascript_with_bun() {
+    let project_ctx = ProjectContext {
+        language: Language::JavaScript {
+            package: None,
+            package_manager: Some("bun".to_string()),
+            corepack_enable: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.javascript = {
+            enable = true;
+            bun.enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_devenv_yaml_for_javascript() {
+    let project_ctx = ProjectContext {
+        language: Language::JavaScript {
+            package: Some("pkgs.nodejs_22".to_string()),
+            package_manager: Some("pnpm".to_string()),
+            corepack_enable: Some(true),
+        },
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_yaml(&project_ctx);
+    let expected = r#"
+        inputs:
+          nixpkgs:
+            url: github:cachix/devenv-nixpkgs/rolling
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
 fn test_render_envrc() {
     let envrc = render_envrc();
     let expected = r#"

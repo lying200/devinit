@@ -252,3 +252,57 @@ pub fn prompt_java_config() -> Language {
         maven_enable,
     }
 }
+
+pub fn prompt_javascript_config() -> Language {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("use default javascript config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Language::JavaScript {
+            package: None,
+            package_manager: None,
+            corepack_enable: None,
+        };
+    }
+
+    let package_input: String = Input::with_theme(&theme)
+        .with_prompt("package")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let package = if package_input.is_empty() {
+        None
+    } else {
+        Some(package_input.trim().to_string())
+    };
+
+    let package_managers = vec!["none", "npm", "pnpm", "yarn", "bun"];
+    let package_manager_idx = Select::with_theme(&theme)
+        .with_prompt("package manager")
+        .default(0)
+        .items(&package_managers)
+        .interact()
+        .expect("interact err exit");
+    let package_manager = if package_manager_idx == 0 {
+        None
+    } else {
+        Some(package_managers[package_manager_idx].to_string())
+    };
+
+    let corepack_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable corepack?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+
+    Language::JavaScript {
+        package,
+        package_manager,
+        corepack_enable,
+    }
+}

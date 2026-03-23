@@ -49,7 +49,15 @@ pub enum Language {
         #[serde(skip_serializing_if = "Option::is_none")]
         maven_enable: Option<bool>,
     },
-    Nodejs,
+    #[serde(rename = "javascript")]
+    JavaScript {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package_manager: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        corepack_enable: Option<bool>,
+    },
 }
 
 #[derive(Debug, Clone, Serialize)]
