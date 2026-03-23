@@ -36,4 +36,30 @@
     {%- endif %}
   };
   {%- endif %}
+
+  {% if project_ctx.language.name == "python" -%}
+  languages.python = {
+    enable = true;
+
+    {%- if project_ctx.language.version is defined %}
+    version = "{{ project_ctx.language.version }}";
+    {%- endif %}
+
+    {%- if project_ctx.language.package is defined %}
+    package = {{ project_ctx.language.package }};
+    {%- endif %}
+
+    {%- if project_ctx.language.uv_enable is defined %}
+    uv.enable = {{ project_ctx.language.uv_enable }};
+    {%- endif %}
+
+    {%- if project_ctx.language.venv_enable is defined %}
+    venv.enable = {{ project_ctx.language.venv_enable }};
+    {%- endif %}
+
+    {%- if project_ctx.language.venv_quiet is defined %}
+    venv.quiet = {{ project_ctx.language.venv_quiet }};
+    {%- endif %}
+  };
+  {%- endif %}
 }

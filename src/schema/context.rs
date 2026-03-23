@@ -23,7 +23,18 @@ pub enum Language {
         #[serde(skip_serializing_if = "Option::is_none")]
         targets: Option<Vec<String>>,
     },
-    Python,
+    Python {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        version: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        uv_enable: Option<bool>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        venv_enable: Option<bool>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        venv_quiet: Option<bool>,
+    },
     Go,
     Java,
     Nodejs,
