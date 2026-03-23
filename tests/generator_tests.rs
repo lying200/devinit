@@ -6,7 +6,26 @@ fn nomalize_whitespace(s: &str) -> String {
 }
 
 #[test]
-fn test_render_rust_base() {
+fn test_render_rust_base_without_tools_has_no_git_package() {
+    let project_ctx = ProjectContext {
+        language: Language::Rust {
+            channel: None,
+            version: None,
+            components: None,
+            targets: None,
+        },
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+
+    assert!(!devenv_conf.contains("pkgs.git"));
+    assert!(devenv_conf.contains("packages = ["));
+    assert!(devenv_conf.contains("languages.rust"));
+}
+
+#[test]
+fn test_render_rust_with_explicit_git_tool_includes_git_package() {
     let project_ctx = ProjectContext {
         language: Language::Rust {
             channel: None,
@@ -18,12 +37,29 @@ fn test_render_rust_base() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
+
+    assert!(devenv_conf.contains("pkgs.git"));
+    assert!(devenv_conf.contains("languages.rust"));
+}
+
+#[test]
+fn test_render_rust_base() {
+    let project_ctx = ProjectContext {
+        language: Language::Rust {
+            channel: None,
+            version: None,
+            components: None,
+            targets: None,
+        },
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
         { pkgs, ... }:
 
         {
           packages = [
-            pkgs.git
           ];
 
           languages.rust = {
@@ -47,7 +83,7 @@ fn test_render_rust_with_channel() {
             targets: None,
         },
         services: vec![],
-        tools: vec!["git".to_string()],
+        tools: vec![],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
@@ -55,7 +91,6 @@ fn test_render_rust_with_channel() {
 
         {
           packages = [
-            pkgs.git
           ];
 
           languages.rust = {
@@ -80,7 +115,7 @@ fn test_render_rust_with_version() {
             targets: None,
         },
         services: vec![],
-        tools: vec!["git".to_string()],
+        tools: vec![],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
@@ -88,7 +123,6 @@ fn test_render_rust_with_version() {
 
         {
           packages = [
-            pkgs.git
           ];
 
           languages.rust = {
@@ -113,7 +147,7 @@ fn test_render_rust_with_components() {
             targets: None,
         },
         services: vec![],
-        tools: vec!["git".to_string()],
+        tools: vec![],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
@@ -121,7 +155,6 @@ fn test_render_rust_with_components() {
 
         {
           packages = [
-            pkgs.git
           ];
 
           languages.rust = {
@@ -148,7 +181,7 @@ fn test_render_rust_with_targets() {
             targets: Some(vec!["wasm32-unknown-unknown".to_string()]),
         },
         services: vec![],
-        tools: vec!["git".to_string()],
+        tools: vec![],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = r#"
@@ -156,7 +189,6 @@ fn test_render_rust_with_targets() {
 
         {
           packages = [
-            pkgs.git
           ];
 
           languages.rust = {
