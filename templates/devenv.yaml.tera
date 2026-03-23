@@ -8,6 +8,13 @@ inputs:
       nixpkgs:
         follows: nixpkgs
   {% endif %}
+  {% if project_ctx.language.name == "python" and project_ctx.language.version is defined %}
+  nixpkgs-python:
+    url: github:cachix/nixpkgs-python
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
+  {% endif %}
   {% if project_ctx.language.name == "go" and project_ctx.language.version is defined %}
   go-overlay:
     url: github:nix-community/go-overlay

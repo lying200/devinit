@@ -377,6 +377,61 @@ fn test_render_python_with_venv() {
 }
 
 #[test]
+fn test_render_devenv_yaml_for_python_with_version() {
+    let project_ctx = ProjectContext {
+        language: Language::Python {
+            version: Some("3.11".to_string()),
+            package: None,
+            uv_enable: None,
+            venv_enable: None,
+            venv_quiet: None,
+        },
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_yaml(&project_ctx);
+    let expected = r#"
+        inputs:
+          nixpkgs:
+            url: github:cachix/devenv-nixpkgs/rolling
+          nixpkgs-python:
+            url: github:cachix/nixpkgs-python
+            inputs:
+              nixpkgs:
+                follows: nixpkgs
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_devenv_yaml_for_python_with_package_only() {
+    let project_ctx = ProjectContext {
+        language: Language::Python {
+            version: None,
+            package: Some("pkgs.python311".to_string()),
+            uv_enable: None,
+            venv_enable: None,
+            venv_quiet: None,
+        },
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_yaml(&project_ctx);
+    let expected = r#"
+        inputs:
+          nixpkgs:
+            url: github:cachix/devenv-nixpkgs/rolling
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
 fn test_render_go_base() {
     let project_ctx = ProjectContext {
         language: Language::Go {
