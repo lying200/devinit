@@ -252,3 +252,78 @@ pub fn prompt_java_config() -> Language {
         maven_enable,
     }
 }
+
+pub fn prompt_javascript_config() -> Language {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("use default javascript config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Language::JavaScript {
+            package: None,
+            npm_enable: None,
+            pnpm_enable: None,
+            yarn_enable: None,
+            corepack_enable: None,
+            bun_enable: None,
+        };
+    }
+
+    let package_input: String = Input::with_theme(&theme)
+        .with_prompt("package")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let package = if package_input.is_empty() {
+        None
+    } else {
+        Some(package_input.trim().to_string())
+    };
+
+    let npm_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable npm?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+    let pnpm_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable pnpm?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+    let yarn_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable yarn?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+    let corepack_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable corepack?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+    let bun_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable bun?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+
+    Language::JavaScript {
+        package,
+        npm_enable,
+        pnpm_enable,
+        yarn_enable,
+        corepack_enable,
+        bun_enable,
+    }
+}

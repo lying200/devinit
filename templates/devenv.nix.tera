@@ -94,4 +94,34 @@
     {%- endif %}
   };
   {%- endif %}
+
+  {% if project_ctx.language.name == "javascript" -%}
+  languages.javascript = {
+    enable = true;
+
+    {%- if project_ctx.language.package is defined %}
+    package = {{ project_ctx.language.package }};
+    {%- endif %}
+
+    {%- if project_ctx.language.npm_enable is defined %}
+    npm.enable = {{ project_ctx.language.npm_enable }};
+    {%- endif %}
+
+    {%- if project_ctx.language.pnpm_enable is defined %}
+    pnpm.enable = {{ project_ctx.language.pnpm_enable }};
+    {%- endif %}
+
+    {%- if project_ctx.language.yarn_enable is defined %}
+    yarn.enable = {{ project_ctx.language.yarn_enable }};
+    {%- endif %}
+
+    {%- if project_ctx.language.corepack_enable is defined %}
+    corepack.enable = {{ project_ctx.language.corepack_enable }};
+    {%- endif %}
+
+    {%- if project_ctx.language.bun_enable is defined %}
+    bun.enable = {{ project_ctx.language.bun_enable }};
+    {%- endif %}
+  };
+  {%- endif %}
 }
