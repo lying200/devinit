@@ -164,3 +164,42 @@ pub fn prompt_python_config() -> Language {
         venv_quiet,
     }
 }
+
+pub fn prompt_go_config() -> Language {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("use default go config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Language::Go {
+            version: None,
+            package: None,
+        };
+    }
+
+    let version_input: String = Input::with_theme(&theme)
+        .with_prompt("version")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let version = if version_input.is_empty() {
+        None
+    } else {
+        Some(version_input.trim().to_string())
+    };
+
+    let package_input: String = Input::with_theme(&theme)
+        .with_prompt("package")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let package = if package_input.is_empty() {
+        None
+    } else {
+        Some(package_input.trim().to_string())
+    };
+
+    Language::Go { version, package }
+}
