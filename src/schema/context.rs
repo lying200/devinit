@@ -35,7 +35,12 @@ pub enum Language {
         #[serde(skip_serializing_if = "Option::is_none")]
         venv_quiet: Option<bool>,
     },
-    Go,
+    Go {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        version: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package: Option<String>,
+    },
     Java,
     Nodejs,
 }

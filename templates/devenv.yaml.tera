@@ -8,3 +8,10 @@ inputs:
       nixpkgs:
         follows: nixpkgs
   {% endif %}
+  {% if project_ctx.language.name == "go" and project_ctx.language.version is defined %}
+  go-overlay:
+    url: github:nix-community/go-overlay
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
+  {% endif %}

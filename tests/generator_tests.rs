@@ -377,6 +377,147 @@ fn test_render_python_with_venv() {
 }
 
 #[test]
+fn test_render_go_base() {
+    let project_ctx = ProjectContext {
+        language: Language::Go {
+            version: None,
+            package: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.go = {
+            enable = true;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_go_with_version() {
+    let project_ctx = ProjectContext {
+        language: Language::Go {
+            version: Some("1.22.0".to_string()),
+            package: None,
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.go = {
+            enable = true;
+            version = "1.22.0";
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_go_with_package() {
+    let project_ctx = ProjectContext {
+        language: Language::Go {
+            version: None,
+            package: Some("pkgs.go_1_24".to_string()),
+        },
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = r#"
+        { pkgs, ... }:
+
+        {
+          packages = [
+            pkgs.git
+          ];
+
+          languages.go = {
+            enable = true;
+            package = pkgs.go_1_24;
+          };
+        }
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_devenv_yaml_for_go_with_version() {
+    let project_ctx = ProjectContext {
+        language: Language::Go {
+            version: Some("1.22.0".to_string()),
+            package: None,
+        },
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_yaml(&project_ctx);
+    let expected = r#"
+        inputs:
+          nixpkgs:
+            url: github:cachix/devenv-nixpkgs/rolling
+          go-overlay:
+            url: github:nix-community/go-overlay
+            inputs:
+              nixpkgs:
+                follows: nixpkgs
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
+fn test_render_devenv_yaml_for_go_with_package_only() {
+    let project_ctx = ProjectContext {
+        language: Language::Go {
+            version: None,
+            package: Some("pkgs.go_1_24".to_string()),
+        },
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_yaml(&project_ctx);
+    let expected = r#"
+        inputs:
+          nixpkgs:
+            url: github:cachix/devenv-nixpkgs/rolling
+        "#;
+    assert_eq!(
+        nomalize_whitespace(expected),
+        nomalize_whitespace(&devenv_conf)
+    )
+}
+
+#[test]
 fn test_render_envrc() {
     let envrc = render_envrc();
     let expected = r#"

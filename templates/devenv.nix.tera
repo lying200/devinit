@@ -62,4 +62,18 @@
     {%- endif %}
   };
   {%- endif %}
+
+  {% if project_ctx.language.name == "go" -%}
+  languages.go = {
+    enable = true;
+
+    {%- if project_ctx.language.version is defined %}
+    version = "{{ project_ctx.language.version }}";
+    {%- endif %}
+
+    {%- if project_ctx.language.package is defined %}
+    package = {{ project_ctx.language.package }};
+    {%- endif %}
+  };
+  {%- endif %}
 }
