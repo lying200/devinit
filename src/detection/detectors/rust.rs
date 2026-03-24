@@ -3,6 +3,11 @@ use std::{fs, io, path::Path};
 use crate::detection::{DetectionConfidence, LanguageCandidate};
 use crate::schema::Language;
 
+/// Detects Rust projects from Cargo and toolchain files.
+///
+/// # Errors
+///
+/// Returns any I/O error produced while reading Rust toolchain files.
 pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
     let cargo_toml = target_dir.join("Cargo.toml");
     if !cargo_toml.exists() {

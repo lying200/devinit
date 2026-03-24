@@ -3,6 +3,11 @@ use std::{fs, io, path::Path};
 use crate::detection::{DetectionConfidence, LanguageCandidate};
 use crate::schema::Language;
 
+/// Detects Java projects from Maven and Gradle build files.
+///
+/// # Errors
+///
+/// Returns any I/O error produced while reading Maven or Gradle files.
 pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
     let pom = target_dir.join("pom.xml");
     let gradle = target_dir.join("build.gradle");
@@ -43,10 +48,10 @@ fn detect_jdk_package(target_dir: &Path) -> io::Result<Option<String>> {
     let pom = target_dir.join("pom.xml");
     if pom.exists() {
         let content = fs::read_to_string(&pom)?;
-        if let Some(major) = parse_maven_java_version(&content) {
-            if let Some(pkg) = jdk_package_for_major(&major) {
-                return Ok(Some(pkg));
-            }
+        if let Some(major) = parse_maven_java_version(&content)
+            && let Some(pkg) = jdk_package_for_major(&major)
+        {
+            return Ok(Some(pkg));
         }
     }
 
@@ -54,10 +59,10 @@ fn detect_jdk_package(target_dir: &Path) -> io::Result<Option<String>> {
         let path = target_dir.join(file);
         if path.exists() {
             let content = fs::read_to_string(&path)?;
-            if let Some(major) = parse_gradle_java_version(&content) {
-                if let Some(pkg) = jdk_package_for_major(&major) {
-                    return Ok(Some(pkg));
-                }
+            if let Some(major) = parse_gradle_java_version(&content)
+                && let Some(pkg) = jdk_package_for_major(&major)
+            {
+                return Ok(Some(pkg));
             }
         }
     }
@@ -67,7 +72,11 @@ fn detect_jdk_package(target_dir: &Path) -> io::Result<Option<String>> {
 
 fn parse_maven_java_version(content: &str) -> Option<String> {
     let sanitized = strip_xml_comments(content);
-    for tag in ["maven.compiler.release", "maven.compiler.source", "java.version"] {
+    for tag in [
+        "maven.compiler.release",
+        "maven.compiler.source",
+        "java.version",
+    ] {
         if let Some(value) = first_direct_tag_value(&sanitized, tag) {
             return Some(value);
         }
@@ -180,14 +189,7 @@ fn parse_language_version_assignment(content: &str) -> Option<String> {
         content,
         "languageVersion",
         "JavaLanguageVersion.of(",
-        |remainder| {
-            let trimmed = remainder.trim_start();
-            if let Some(after) = trimmed.strip_prefix(')') {
-                Some(after)
-            } else {
-                None
-            }
-        },
+        |remainder| remainder.trim_start().strip_prefix(')'),
     )
 }
 
@@ -253,20 +255,15 @@ where
         return None;
     }
     let remainder_after_digits = &remaining[digits.len()..];
-    if let Some(after_suffix) = suffix_ok(remainder_after_digits) {
-        if line_end_clean(after_suffix) {
-            return Some(digits.to_string());
-        }
+    if let Some(after_suffix) = suffix_ok(remainder_after_digits)
+        && line_end_clean(after_suffix)
+    {
+        return Some(digits.to_string());
     }
     None
 }
 
-fn parse_setter<F>(
-    content: &str,
-    setter: &str,
-    value_prefix: &str,
-    suffix_ok: F,
-) -> Option<String>
+fn parse_setter<F>(content: &str, setter: &str, value_prefix: &str, suffix_ok: F) -> Option<String>
 where
     F: Fn(&str) -> Option<&str>,
 {
@@ -301,10 +298,10 @@ where
         return None;
     }
     let remainder_after_digits = &remaining[digits.len()..];
-    if let Some(after_suffix) = suffix_ok(remainder_after_digits) {
-        if line_end_clean(after_suffix) {
-            return Some(digits.to_string());
-        }
+    if let Some(after_suffix) = suffix_ok(remainder_after_digits)
+        && line_end_clean(after_suffix)
+    {
+        return Some(digits.to_string());
     }
     None
 }

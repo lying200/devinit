@@ -8,22 +8,27 @@ pub mod javascript;
 pub mod python;
 pub mod rust;
 
-pub fn run_detectors(_target_dir: &Path) -> io::Result<Vec<LanguageCandidate>> {
+/// Runs all language detectors for `target_dir`.
+///
+/// # Errors
+///
+/// Returns any I/O error produced by an individual detector.
+pub fn run_detectors(target_dir: &Path) -> io::Result<Vec<LanguageCandidate>> {
     let mut candidates = Vec::new();
 
-    if let Some(candidate) = rust::detect(_target_dir)? {
+    if let Some(candidate) = rust::detect(target_dir)? {
         candidates.push(candidate);
     }
-    if let Some(candidate) = python::detect(_target_dir)? {
+    if let Some(candidate) = python::detect(target_dir)? {
         candidates.push(candidate);
     }
-    if let Some(candidate) = go::detect(_target_dir)? {
+    if let Some(candidate) = go::detect(target_dir)? {
         candidates.push(candidate);
     }
-    if let Some(candidate) = java::detect(_target_dir)? {
+    if let Some(candidate) = java::detect(target_dir)? {
         candidates.push(candidate);
     }
-    if let Some(candidate) = javascript::detect(_target_dir)? {
+    if let Some(candidate) = javascript::detect(target_dir)? {
         candidates.push(candidate);
     }
 

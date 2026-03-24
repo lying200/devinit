@@ -3,6 +3,11 @@ use std::{fs, io, path::Path};
 use crate::detection::{DetectionConfidence, LanguageCandidate};
 use crate::schema::Language;
 
+/// Detects JavaScript projects from `package.json`.
+///
+/// # Errors
+///
+/// Returns any I/O error produced while reading `package.json`.
 pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
     let package_json = target_dir.join("package.json");
     if !package_json.exists() {
@@ -98,15 +103,14 @@ fn parse_greater_equal_major(value: &str) -> Option<String> {
 
     let major = parse_major_only(trimmed)?;
     let major_num: u32 = major.parse().ok()?;
-    if major_num >= 20 {
-        Some(major)
-    } else {
-        None
-    }
+    if major_num >= 20 { Some(major) } else { None }
 }
 
 fn parse_version_like_major(value: &str) -> Option<String> {
-    let trimmed = value.trim().strip_prefix('v').unwrap_or(value.trim());
+    let trimmed = value
+        .trim()
+        .strip_prefix('v')
+        .unwrap_or_else(|| value.trim());
     if trimmed.is_empty() {
         return None;
     }
@@ -125,7 +129,10 @@ fn parse_version_like_major(value: &str) -> Option<String> {
 }
 
 fn parse_major_only(value: &str) -> Option<String> {
-    let trimmed = value.trim().strip_prefix('v').unwrap_or(value.trim());
+    let trimmed = value
+        .trim()
+        .strip_prefix('v')
+        .unwrap_or_else(|| value.trim());
     if is_ascii_digits(trimmed) {
         Some(trimmed.to_string())
     } else {

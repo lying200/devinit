@@ -4,8 +4,8 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use devinit::detection::{DetectionConfidence, LanguageCandidate};
 use devinit::detection::detectors::rust::detect;
+use devinit::detection::{DetectionConfidence, LanguageCandidate};
 use devinit::schema::Language;
 
 fn unique_test_dir(name: &str) -> PathBuf {

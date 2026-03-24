@@ -11,6 +11,11 @@ const DIRECT_MARKERS: &[&str] = &[
     ".direnv",
 ];
 
+/// Detects whether the target directory already contains an environment marker.
+///
+/// # Errors
+///
+/// Returns any I/O error from reading the target directory contents.
 pub fn detect_existing_environment(target_dir: &Path) -> io::Result<Option<String>> {
     if !target_dir.exists() {
         return Ok(None);

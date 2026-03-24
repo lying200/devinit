@@ -3,6 +3,11 @@ use std::{fs, io, path::Path};
 use crate::detection::{DetectionConfidence, LanguageCandidate};
 use crate::schema::Language;
 
+/// Detects Go projects from `go.mod`.
+///
+/// # Errors
+///
+/// Returns any I/O error produced while reading `go.mod`.
 pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
     let go_mod = target_dir.join("go.mod");
     if !go_mod.exists() {

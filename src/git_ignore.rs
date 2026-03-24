@@ -40,6 +40,7 @@ const LOCAL_EXCLUDE_LINES: &[&str] = &[
     ".envrc",
 ];
 
+#[must_use]
 pub fn find_git_repo_root(target_dir: &Path) -> Option<PathBuf> {
     let output = Command::new("git")
         .arg("-C")
@@ -60,6 +61,12 @@ pub fn find_git_repo_root(target_dir: &Path) -> Option<PathBuf> {
     }
 }
 
+/// Applies the selected ignore mode for generated `devenv` files.
+///
+/// # Errors
+///
+/// Returns any I/O error from reading or writing ignore files, or from `git
+/// ls-files` when checking tracked files.
 pub fn apply_ignore_mode(target_dir: &Path, mode: IgnoreMode) -> io::Result<IgnoreOutcome> {
     if mode == IgnoreMode::None {
         return Ok(IgnoreOutcome::default());
@@ -93,7 +100,7 @@ pub fn apply_ignore_mode(target_dir: &Path, mode: IgnoreMode) -> io::Result<Igno
     })
 }
 
-fn ignore_lines_for_mode(mode: IgnoreMode) -> &'static [&'static str] {
+const fn ignore_lines_for_mode(mode: IgnoreMode) -> &'static [&'static str] {
     match mode {
         IgnoreMode::None => &[],
         IgnoreMode::GitIgnore => SHARED_IGNORE_LINES,

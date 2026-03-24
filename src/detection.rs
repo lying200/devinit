@@ -1,5 +1,5 @@
-pub mod engine;
 pub mod detectors;
+pub mod engine;
 pub mod types;
 
 pub use engine::detect_project;

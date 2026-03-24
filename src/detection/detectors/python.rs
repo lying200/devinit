@@ -3,12 +3,20 @@ use std::{fs, io, path::Path};
 use crate::detection::{DetectionConfidence, LanguageCandidate};
 use crate::schema::Language;
 
+/// Detects Python projects from standard manifest files.
+///
+/// # Errors
+///
+/// Returns any I/O error produced while reading `.python-version`.
 pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
     let pyproject = target_dir.join("pyproject.toml");
     let requirements = target_dir.join("requirements.txt");
 
     let (confidence, mut reasons) = if pyproject.exists() {
-        (DetectionConfidence::High, vec!["found pyproject.toml".to_string()])
+        (
+            DetectionConfidence::High,
+            vec!["found pyproject.toml".to_string()],
+        )
     } else if requirements.exists() {
         (
             DetectionConfidence::Medium,
