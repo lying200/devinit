@@ -3,7 +3,7 @@ use devinit::{
     cli::{Cli, LanguageChoice},
     generator::{plan_files, write_files},
     git_ignore::{apply_ignore_mode, find_git_repo_root},
-    init_guard::{detect_existing_environment, initialize_git_repository, target_dir_was_empty},
+    init_guard::detect_existing_environment,
     prompt::{
         prompt_go_config, prompt_ignore_mode, prompt_java_config, prompt_javascript_config,
         prompt_python_config, prompt_rust_config,
@@ -15,10 +15,9 @@ use dialoguer::{Select, theme::ColorfulTheme};
 fn main() {
     let cli = Cli::parse();
     let target_dir = cli.path;
-    let existed_before = target_dir.exists();
 
-    if let Err(e) = std::fs::create_dir_all(&target_dir) {
-        eprint!("create init target err: {}", e);
+    if !target_dir.exists() {
+        eprint!("init target does not exist: {}", target_dir.display());
         std::process::exit(1);
     }
 
@@ -31,20 +30,6 @@ fn main() {
             return;
         }
         Ok(None) => {}
-        Err(e) => {
-            eprint!("inspect init target err: {}", e);
-            std::process::exit(1);
-        }
-    }
-
-    match target_dir_was_empty(&target_dir, existed_before) {
-        Ok(true) => {
-            if let Err(e) = initialize_git_repository(&target_dir) {
-                eprint!("git init err: {}", e);
-                std::process::exit(1);
-            }
-        }
-        Ok(false) => {}
         Err(e) => {
             eprint!("inspect init target err: {}", e);
             std::process::exit(1);

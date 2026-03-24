@@ -147,7 +147,7 @@ fn tracked_files_are_reported_without_removing_them() {
 }
 
 #[test]
-fn find_git_repo_root_requires_git_in_current_directory() {
+fn find_git_repo_root_finds_parent_repository_for_nested_target() {
     let repo_dir = unique_test_dir("find-root");
     let nested_dir = repo_dir.join("deep/nested/path");
     init_git_repo(&repo_dir);
@@ -156,12 +156,12 @@ fn find_git_repo_root_requires_git_in_current_directory() {
     let nested_root = find_git_repo_root(&nested_dir);
     let repo_root = find_git_repo_root(&repo_dir);
 
-    assert!(nested_root.is_none());
+    assert_eq!(nested_root.as_deref(), Some(repo_dir.as_path()));
     assert_eq!(repo_root.as_deref(), Some(repo_dir.as_path()));
 }
 
 #[test]
-fn local_exclude_skips_when_only_parent_directory_is_a_git_repo() {
+fn local_exclude_uses_parent_repository_for_nested_target() {
     let repo_dir = unique_test_dir("local-exclude-skip");
     let nested_dir = repo_dir.join("nested/project");
     init_git_repo(&repo_dir);
@@ -169,8 +169,11 @@ fn local_exclude_skips_when_only_parent_directory_is_a_git_repo() {
 
     let outcome = apply_ignore_mode(&nested_dir, IgnoreMode::LocalExclude).unwrap();
 
-    assert!(outcome.skipped_for_missing_git);
-    assert!(outcome.destination.is_none());
+    assert!(!outcome.skipped_for_missing_git);
+    assert_eq!(
+        outcome.destination.as_deref(),
+        Some(repo_dir.join(".git/info/exclude").as_path())
+    );
 }
 
 #[test]

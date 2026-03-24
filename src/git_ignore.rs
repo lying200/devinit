@@ -41,10 +41,22 @@ const LOCAL_EXCLUDE_LINES: &[&str] = &[
 ];
 
 pub fn find_git_repo_root(target_dir: &Path) -> Option<PathBuf> {
-    if target_dir.join(".git").exists() {
-        Some(target_dir.to_path_buf())
-    } else {
+    let output = Command::new("git")
+        .arg("-C")
+        .arg(target_dir)
+        .args(["rev-parse", "--show-toplevel"])
+        .output()
+        .ok()?;
+
+    if !output.status.success() {
+        return None;
+    }
+
+    let repo_root = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    if repo_root.is_empty() {
         None
+    } else {
+        Some(PathBuf::from(repo_root))
     }
 }
 

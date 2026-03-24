@@ -5,7 +5,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use devinit::init_guard::{detect_existing_environment, has_local_git_dir, target_dir_was_empty};
+use devinit::init_guard::detect_existing_environment;
 
 fn unique_test_dir(name: &str) -> PathBuf {
     let nanos = SystemTime::now()
@@ -100,47 +100,6 @@ fn detect_existing_environment_returns_none_for_missing_directory() {
 }
 
 #[test]
-fn target_dir_was_empty_returns_true_for_missing_directory() {
-    let dir = unique_test_dir("missing-empty");
-
-    let is_empty = target_dir_was_empty(&dir, false).unwrap();
-
-    assert!(is_empty);
-}
-
-#[test]
-fn target_dir_was_empty_returns_true_for_existing_empty_directory() {
-    let dir = unique_test_dir("existing-empty");
-    create_dir(&dir);
-
-    let is_empty = target_dir_was_empty(&dir, true).unwrap();
-
-    assert!(is_empty);
-}
-
-#[test]
-fn target_dir_was_empty_returns_false_for_non_empty_directory() {
-    let dir = unique_test_dir("non-empty");
-    create_dir(&dir);
-    fs::write(dir.join("README.md"), "# devinit").unwrap();
-
-    let is_empty = target_dir_was_empty(&dir, true).unwrap();
-
-    assert!(!is_empty);
-}
-
-#[test]
-fn has_local_git_dir_only_checks_target_directory() {
-    let parent = unique_test_dir("git-parent");
-    let child = parent.join("child");
-    create_dir(&parent.join(".git"));
-    create_dir(&child);
-
-    assert!(has_local_git_dir(&parent));
-    assert!(!has_local_git_dir(&child));
-}
-
-#[test]
 fn devinit_skips_initialization_when_existing_environment_is_detected() {
     let dir = unique_test_dir("skip-binary");
     create_dir(&dir);
@@ -162,7 +121,7 @@ fn devinit_skips_initialization_when_existing_environment_is_detected() {
 }
 
 #[test]
-fn devinit_creates_missing_target_dir_before_prompting() {
+fn devinit_errors_when_target_directory_does_not_exist() {
     let dir = unique_test_dir("create-missing");
 
     let output = Command::new(env!("CARGO_BIN_EXE_devinit"))
@@ -174,32 +133,15 @@ fn devinit_creates_missing_target_dir_before_prompting() {
         .output()
         .unwrap();
 
-    assert!(dir.exists());
+    assert!(!output.status.success());
+    assert!(!dir.exists());
     let stderr = String::from_utf8(output.stderr).unwrap();
-    assert!(!stderr.contains("create init target err"));
+    assert!(stderr.contains("init target does not exist"));
 }
 
 #[test]
-fn devinit_initializes_git_for_missing_directory() {
-    let dir = unique_test_dir("git-init-missing");
-
-    let output = Command::new(env!("CARGO_BIN_EXE_devinit"))
-        .arg("--lang")
-        .arg("rust")
-        .arg(&dir)
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
-        .output()
-        .unwrap();
-
-    assert!(dir.join(".git").exists());
-    let stderr = String::from_utf8(output.stderr).unwrap();
-    assert!(!stderr.contains("git init"));
-}
-
-#[test]
-fn devinit_initializes_git_for_existing_empty_directory() {
-    let dir = unique_test_dir("git-init-empty");
+fn devinit_does_not_initialize_git_for_existing_empty_directory() {
+    let dir = unique_test_dir("existing-empty-no-git");
     create_dir(&dir);
 
     let output = Command::new(env!("CARGO_BIN_EXE_devinit"))
@@ -211,7 +153,7 @@ fn devinit_initializes_git_for_existing_empty_directory() {
         .output()
         .unwrap();
 
-    assert!(dir.join(".git").exists());
+    assert!(!dir.join(".git").exists());
     let stderr = String::from_utf8(output.stderr).unwrap();
     assert!(!stderr.contains("git init"));
 }
