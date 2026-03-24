@@ -17,21 +17,23 @@ fn main() {
     let target_dir = cli.path;
 
     if !target_dir.exists() {
-        eprint!("init target does not exist: {}", target_dir.display());
+        eprint!(
+            "init target does not exist: {path}",
+            path = target_dir.display()
+        );
         std::process::exit(1);
     }
 
     match detect_existing_environment(&target_dir) {
         Ok(Some(found)) => {
             println!(
-                "existing direnv/devenv/nix environment detected ({}), skipping devinit initialization",
-                found
+                "existing direnv/devenv/nix environment detected ({found}), skipping devinit initialization"
             );
             return;
         }
         Ok(None) => {}
         Err(e) => {
-            eprint!("inspect init target err: {}", e);
+            eprint!("inspect init target err: {e}");
             std::process::exit(1);
         }
     }
@@ -73,7 +75,7 @@ fn main() {
 
     let output_file = plan_files(&ctx);
     if let Err(e) = write_files(&target_dir, &output_file) {
-        eprint!("generate devenv file err: {}", e);
+        eprint!("generate devenv file err: {e}");
         std::process::exit(1);
     }
 
@@ -88,12 +90,12 @@ fn main() {
                         "ignored patterns were added, but tracked files remain tracked by git"
                     );
                     for path in outcome.tracked_files {
-                        println!("- {}", path);
+                        println!("- {path}");
                     }
                 }
             }
             Err(e) => {
-                eprint!("apply git ignore err: {}", e);
+                eprint!("apply git ignore err: {e}");
                 std::process::exit(1);
             }
         }

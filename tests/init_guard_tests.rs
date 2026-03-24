@@ -8,15 +8,13 @@ use std::{
 use devinit::init_guard::detect_existing_environment;
 
 fn unique_test_dir(name: &str) -> PathBuf {
+    let pid = std::process::id();
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_nanos();
     std::env::temp_dir().join(format!(
-        "devinit-init-guard-{}-{}-{}",
-        name,
-        std::process::id(),
-        nanos
+        "devinit-init-guard-{name}-{pid}-{nanos}"
     ))
 }
 

@@ -11,11 +11,12 @@ use devinit::{
 };
 
 fn unique_test_dir(name: &str) -> PathBuf {
+    let pid = std::process::id();
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_nanos();
-    std::env::temp_dir().join(format!("devinit-{}-{}-{}", name, std::process::id(), nanos))
+    std::env::temp_dir().join(format!("devinit-{name}-{pid}-{nanos}"))
 }
 
 fn init_git_repo(path: &Path) {
@@ -35,7 +36,7 @@ fn git(path: &Path, args: &[&str]) {
         .current_dir(path)
         .status()
         .unwrap();
-    assert!(status.success(), "git {:?} should succeed", args);
+    assert!(status.success(), "git {args:?} should succeed");
 }
 
 #[test]

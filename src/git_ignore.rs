@@ -146,8 +146,8 @@ fn tracked_ignore_files(repo_root: &Path, target_dir: &Path) -> io::Result<Vec<S
 
     if !output.status.success() {
         return Err(io::Error::other(format!(
-            "git ls-files failed with status {}",
-            output.status
+            "git ls-files failed with status {status}",
+            status = output.status
         )));
     }
 
