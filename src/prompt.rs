@@ -1,5 +1,7 @@
 use dialoguer::{Confirm, Input, MultiSelect, Select, theme::ColorfulTheme};
 
+use crate::cli::LanguageChoice;
+use crate::detection::LanguageCandidate;
 use crate::git_ignore::IgnoreMode;
 use crate::schema::Language;
 
@@ -26,6 +28,105 @@ pub fn prompt_ignore_mode() -> IgnoreMode {
         .expect("select err");
 
     ignore_mode_from_selection(selection)
+}
+
+pub fn prompt_language_choice() -> LanguageChoice {
+    let options = vec!["Rust", "Python", "Go", "Java", "JavaScript"];
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select language")
+        .default(0)
+        .items(&options)
+        .interact()
+        .expect("select err");
+
+    match selection {
+        0 => LanguageChoice::Rust,
+        1 => LanguageChoice::Python,
+        2 => LanguageChoice::Go,
+        3 => LanguageChoice::Java,
+        4 => LanguageChoice::JavaScript,
+        _ => unreachable!(),
+    }
+}
+
+pub fn prompt_language_config(choice: LanguageChoice) -> Language {
+    match choice {
+        LanguageChoice::Rust => prompt_rust_config(),
+        LanguageChoice::Python => prompt_python_config(),
+        LanguageChoice::Go => prompt_go_config(),
+        LanguageChoice::Java => prompt_java_config(),
+        LanguageChoice::JavaScript => prompt_javascript_config(),
+    }
+}
+
+pub fn format_detected_summary(candidate: &LanguageCandidate) -> String {
+    let mut lines = vec![format!(
+        "detected language: {}",
+        detected_language_name(&candidate.language)
+    )];
+
+    if let Some(field_line) = detected_primary_field(candidate) {
+        lines.push(field_line);
+    }
+
+    for reason in &candidate.reasons {
+        lines.push(format!("- {reason}"));
+    }
+
+    lines.join("\n")
+}
+
+pub fn confirm_detected_config(candidate: &LanguageCandidate) -> bool {
+    println!("{}", format_detected_summary(candidate));
+    Confirm::with_theme(&ColorfulTheme::default())
+        .with_prompt("Use detected config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit")
+}
+
+fn detected_language_name(language: &Language) -> &'static str {
+    match language {
+        Language::Rust { .. } => "Rust",
+        Language::Python { .. } => "Python",
+        Language::Go { .. } => "Go",
+        Language::Java { .. } => "Java",
+        Language::JavaScript { .. } => "JavaScript",
+    }
+}
+
+fn detected_primary_field(candidate: &LanguageCandidate) -> Option<String> {
+    match &candidate.language {
+        Language::Rust {
+            channel: Some(channel),
+            ..
+        } => Some(format!("detected channel: {channel}")),
+        Language::Rust {
+            version: Some(version),
+            ..
+        } => Some(format!("detected version: {version}")),
+        Language::Python {
+            version: Some(version),
+            ..
+        } => Some(format!("detected version: {version}")),
+        Language::Go {
+            version: Some(version),
+            ..
+        } => Some(format!("detected version: {version}")),
+        Language::Java {
+            gradle_enable: Some(true),
+            ..
+        } => Some("detected build tool: gradle".to_string()),
+        Language::Java {
+            maven_enable: Some(true),
+            ..
+        } => Some("detected build tool: maven".to_string()),
+        Language::JavaScript {
+            package_manager: Some(manager),
+            ..
+        } => Some(format!("detected package manager: {manager}")),
+        _ => None,
+    }
 }
 
 pub fn prompt_rust_config() -> Language {

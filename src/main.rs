@@ -1,16 +1,17 @@
 use clap::Parser;
 use devinit::{
     cli::{Cli, LanguageChoice},
+    detection::{DetectionOutcome, detect_project},
     generator::{plan_files, write_files},
     git_ignore::{apply_ignore_mode, find_git_repo_root},
     init_guard::detect_existing_environment,
     prompt::{
-        prompt_go_config, prompt_ignore_mode, prompt_java_config, prompt_javascript_config,
-        prompt_python_config, prompt_rust_config,
+        confirm_detected_config, prompt_ignore_mode, prompt_language_choice,
+        prompt_language_config,
     },
+    resolution::{ResolutionPlan, plan_language_resolution},
     schema::ProjectContext,
 };
-use dialoguer::{Select, theme::ColorfulTheme};
 
 fn main() {
     let cli = Cli::parse();
@@ -38,33 +39,12 @@ fn main() {
         }
     }
 
-    let lang_choice = match cli.lang {
-        Some(l) => l,
-        None => {
-            let options = vec!["Rust", "Python", "Go", "Java", "JavaScript"];
-            let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Select language")
-                .default(0)
-                .items(&options)
-                .interact()
-                .expect("select err");
-            match selection {
-                0 => LanguageChoice::Rust,
-                1 => LanguageChoice::Python,
-                2 => LanguageChoice::Go,
-                3 => LanguageChoice::Java,
-                4 => LanguageChoice::JavaScript,
-                _ => unreachable!(),
-            }
+    let language = match resolve_language_config(&target_dir, cli.lang) {
+        Ok(language) => language,
+        Err(e) => {
+            eprint!("resolve language config err: {e}");
+            std::process::exit(1);
         }
-    };
-
-    let language = match lang_choice {
-        LanguageChoice::Rust => prompt_rust_config(),
-        LanguageChoice::Python => prompt_python_config(),
-        LanguageChoice::Go => prompt_go_config(),
-        LanguageChoice::Java => prompt_java_config(),
-        LanguageChoice::JavaScript => prompt_javascript_config(),
     };
 
     let ctx = ProjectContext {
@@ -103,4 +83,25 @@ fn main() {
 
     println!("devenv init success!");
     println!("use \"direnv allow\" to activate the environment.")
+}
+
+fn resolve_language_config(target_dir: &std::path::Path, cli_lang: Option<LanguageChoice>) -> std::io::Result<devinit::schema::Language> {
+    let detection = if cli_lang.is_none() {
+        detect_project(target_dir)?
+    } else {
+        DetectionOutcome::NoMatch
+    };
+
+    let use_detected = match &detection {
+        DetectionOutcome::Match { candidate } => confirm_detected_config(candidate),
+        DetectionOutcome::NoMatch => false,
+    };
+
+    let plan = plan_language_resolution(cli_lang, detection, use_detected);
+
+    Ok(match plan {
+        ResolutionPlan::Explicit(choice) => prompt_language_config(choice),
+        ResolutionPlan::UseDetected(language) => language,
+        ResolutionPlan::PromptManual => prompt_language_config(prompt_language_choice()),
+    })
 }
