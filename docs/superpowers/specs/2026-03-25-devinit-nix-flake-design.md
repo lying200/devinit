@@ -147,12 +147,12 @@ This keeps the Rust source unchanged for the first version and makes behavior co
 `flake.nix` should:
 
 - import `nixpkgs`
-- use a small per-system loop such as `flake-utils.lib.eachSystem`
+- use a small per-system loop; `flake-utils.lib.eachSystem` is acceptable but not required
 - instantiate `pkgs` for each supported Linux system
 - call `nix/package.nix`
 - expose the package under both `default` and `devinit`
 - define `apps.default.program` from the packaged binary path
-- define a minimal `devShell` with Rust tooling and Nix packaging helpers appropriate to current repository conventions
+- define a minimal `devShell` that complements the existing `devenv.nix` as a flake-native fallback entry point rather than replacing the contributor workflow already centered on `devenv`
 
 The flake should stay focused on package exposure. It should not duplicate the package build logic inline.
 
@@ -172,7 +172,7 @@ This is the primary target flow and should be shown in the README.
 
 Users can run:
 
-- `nix run github:<owner>/devinit`
+- `nix run github:<owner>/<repo>`
 
 This should invoke the default app and execute the packaged binary directly.
 
@@ -180,7 +180,7 @@ This should invoke the default app and execute the packaged binary directly.
 
 Users can install:
 
-- `nix profile install github:<owner>/devinit`
+- `nix profile install github:<owner>/<repo>`
 
 This should resolve to the default package output.
 
@@ -188,11 +188,12 @@ This should resolve to the default package output.
 
 `README.md` should gain a short Nix installation section that documents:
 
-- `nix run github:<owner>/devinit`
-- `nix profile install github:<owner>/devinit`
+- `nix run github:<owner>/<repo>`
+- `nix profile install github:<owner>/<repo>`
 - a minimal NixOS flake snippet using this repository as an input
 
 The documentation should stay concrete and avoid introducing non-flake paths or speculative platform guarantees.
+Until the repository owner and final repository name are known, `<owner>/<repo>` is an explicit placeholder that the implementation should replace in example text where possible.
 
 ## Verification Strategy
 
@@ -206,6 +207,7 @@ Minimum verification commands:
 If local environment constraints allow, also verify:
 
 - `nix profile install .`
+- a real `git` execution path, for example by running `devinit` against a temporary Git repository and confirming the packaged binary can complete Git-aware logic without relying on host-global PATH state
 
 The verification focus is:
 
