@@ -106,7 +106,7 @@ Rendering rules:
 
 ```yaml
   go-overlay:
-    url: github:nix-community/go-overlay
+    url: github:purpleclay/go-overlay
     inputs:
       nixpkgs:
         follows: nixpkgs
