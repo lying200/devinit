@@ -85,6 +85,27 @@ fn apply_gitignore_rules_does_not_duplicate_existing_entries() {
 }
 
 #[test]
+fn apply_gitignore_rules_appends_only_missing_entries() {
+    let repo_dir = unique_test_dir("gitignore-partial");
+    init_git_repo(&repo_dir);
+
+    let gitignore_path = repo_dir.join(".gitignore");
+    fs::write(&gitignore_path, "node_modules\n.devenv*\n").unwrap();
+
+    let outcome = apply_ignore_mode(&repo_dir, IgnoreMode::GitIgnore).unwrap();
+
+    assert!(outcome.wrote_rules);
+    let content = fs::read_to_string(gitignore_path).unwrap();
+    // existing entries preserved, not duplicated
+    assert_eq!(content.matches(".devenv*").count(), 1);
+    assert!(content.contains("node_modules"));
+    // missing entries added
+    assert!(content.contains("devenv.local.nix"));
+    assert!(content.contains("devenv.local.yaml"));
+    assert!(content.contains(".direnv"));
+}
+
+#[test]
 fn apply_local_exclude_rules_writes_repo_root_exclude() {
     let repo_dir = unique_test_dir("local-exclude");
     init_git_repo(&repo_dir);
