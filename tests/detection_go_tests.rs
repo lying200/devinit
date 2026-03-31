@@ -99,6 +99,32 @@ fn go_detector_empty_go_mod_has_no_version() {
 }
 
 #[test]
+fn go_detector_ignores_toolchain_directive() {
+    let dir = unique_test_dir("go-toolchain-line");
+    create_dir(&dir);
+    fs::write(
+        dir.join("go.mod"),
+        "module example.com/demo\n\ngo 1.22\n\ntoolchain go1.22.5\n",
+    )
+    .unwrap();
+
+    let result = detect(&dir).unwrap();
+
+    // should pick "go 1.22" not "toolchain go1.22.5"
+    assert_eq!(
+        result,
+        Some(LanguageCandidate {
+            language: Language::Go {
+                version: Some("1.22.0".to_string()),
+                package: None,
+            },
+            confidence: DetectionConfidence::High,
+            reasons: vec!["found go.mod".to_string(), "found go version".to_string()],
+        })
+    );
+}
+
+#[test]
 fn go_detector_keeps_three_segment_version_as_is() {
     let dir = unique_test_dir("go-version-three-seg");
     create_dir(&dir);

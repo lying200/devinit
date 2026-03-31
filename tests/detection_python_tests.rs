@@ -257,6 +257,34 @@ fn python_detector_detects_from_requirements_txt_only() {
 }
 
 #[test]
+fn python_detector_requirements_txt_with_python_version_file() {
+    let dir = unique_test_dir("req-with-pyversion");
+    create_dir(&dir);
+    fs::write(dir.join("requirements.txt"), "flask\n").unwrap();
+    fs::write(dir.join(".python-version"), "3.11.4\n").unwrap();
+
+    let result = detect(&dir).unwrap();
+
+    assert_eq!(
+        result,
+        Some(LanguageCandidate {
+            language: Language::Python {
+                version: Some("3.11.4".to_string()),
+                package: None,
+                uv_enable: None,
+                venv_enable: None,
+                venv_quiet: None,
+            },
+            confidence: DetectionConfidence::Medium,
+            reasons: vec![
+                "found requirements.txt".to_string(),
+                "found .python-version".to_string(),
+            ],
+        })
+    );
+}
+
+#[test]
 fn python_detector_dot_python_version_takes_precedence() {
     let dir = unique_test_dir("precedence");
     create_dir(&dir);
