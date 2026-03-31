@@ -55,22 +55,8 @@ fn test_render_rust_base() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-          ];
-
-          languages.rust = {
-            enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -86,23 +72,8 @@ fn test_render_rust_with_channel() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-          ];
-
-          languages.rust = {
-            enable = true;
-            channel = "stable";
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n    channel = \"stable\";\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -118,23 +89,8 @@ fn test_render_rust_with_version() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-          ];
-
-          languages.rust = {
-            enable = true;
-            version = "1.81.0";
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n    version = \"1.81.0\";\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -150,25 +106,8 @@ fn test_render_rust_with_components() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-          ];
-
-          languages.rust = {
-            enable = true;
-            components = [
-              "clippy"
-            ];
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n    components = [\n      \"clippy\"\n    ];\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -184,25 +123,8 @@ fn test_render_rust_with_targets() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-          ];
-
-          languages.rust = {
-            enable = true;
-            targets = [
-              "wasm32-unknown-unknown"
-            ];
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n    targets = [\n      \"wasm32-unknown-unknown\"\n    ];\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -218,20 +140,8 @@ fn test_render_devenv_yaml() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
-    let expected = r#"
-        inputs:
-          nixpkgs:
-            url: github:cachix/devenv-nixpkgs/rolling
-          rust-overlay:
-            url: github:oxalica/rust-overlay
-            inputs:
-              nixpkgs:
-                follows: nixpkgs
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  rust-overlay:\n    url: github:oxalica/rust-overlay\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -248,23 +158,8 @@ fn test_render_python_base() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.python = {
-            enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -281,24 +176,8 @@ fn test_render_python_with_version() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.python = {
-            enable = true;
-            version = "3.11";
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n    version = \"3.11\";\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -315,24 +194,8 @@ fn test_render_python_with_package() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.python = {
-            enable = true;
-            package = pkgs.python311;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n    package = pkgs.python311;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -349,24 +212,8 @@ fn test_render_python_with_uv() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.python = {
-            enable = true;
-            uv.enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n    uv.enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -383,25 +230,8 @@ fn test_render_python_with_venv() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.python = {
-            enable = true;
-            venv.enable = true;
-            venv.quiet = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n    venv.enable = true;\n    venv.quiet = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -418,20 +248,8 @@ fn test_render_devenv_yaml_for_python_with_version() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
-    let expected = r#"
-        inputs:
-          nixpkgs:
-            url: github:cachix/devenv-nixpkgs/rolling
-          nixpkgs-python:
-            url: github:cachix/nixpkgs-python
-            inputs:
-              nixpkgs:
-                follows: nixpkgs
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  nixpkgs-python:\n    url: github:cachix/nixpkgs-python\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -448,15 +266,8 @@ fn test_render_devenv_yaml_for_python_with_package_only() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
-    let expected = r#"
-        inputs:
-          nixpkgs:
-            url: github:cachix/devenv-nixpkgs/rolling
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -470,23 +281,8 @@ fn test_render_go_base() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.go = {
-            enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.go = {\n    enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -500,24 +296,8 @@ fn test_render_go_with_version() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.go = {
-            enable = true;
-            version = "1.22.0";
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.go = {\n    enable = true;\n    version = \"1.22.0\";\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -531,24 +311,8 @@ fn test_render_go_with_package() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.go = {
-            enable = true;
-            package = pkgs.go_1_24;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.go = {\n    enable = true;\n    package = pkgs.go_1_24;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -562,20 +326,8 @@ fn test_render_devenv_yaml_for_go_with_version() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
-    let expected = r#"
-        inputs:
-          nixpkgs:
-            url: github:cachix/devenv-nixpkgs/rolling
-          go-overlay:
-            url: github:nix-community/go-overlay
-            inputs:
-              nixpkgs:
-                follows: nixpkgs
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  go-overlay:\n    url: github:nix-community/go-overlay\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -589,15 +341,8 @@ fn test_render_devenv_yaml_for_go_with_package_only() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
-    let expected = r#"
-        inputs:
-          nixpkgs:
-            url: github:cachix/devenv-nixpkgs/rolling
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -612,23 +357,8 @@ fn test_render_java_base() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.java = {
-            enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.java = {\n    enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -643,24 +373,8 @@ fn test_render_java_with_jdk_package() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.java = {
-            enable = true;
-            jdk.package = pkgs.jdk17;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.java = {\n    enable = true;\n    jdk.package = pkgs.jdk17;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -675,24 +389,8 @@ fn test_render_java_with_gradle() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.java = {
-            enable = true;
-            gradle.enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.java = {\n    enable = true;\n    gradle.enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -707,24 +405,8 @@ fn test_render_java_with_maven() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.java = {
-            enable = true;
-            maven.enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.java = {\n    enable = true;\n    maven.enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -739,15 +421,8 @@ fn test_render_devenv_yaml_for_java() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
-    let expected = r#"
-        inputs:
-          nixpkgs:
-            url: github:cachix/devenv-nixpkgs/rolling
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -762,23 +437,8 @@ fn test_render_javascript_base() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.javascript = {
-            enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -793,24 +453,8 @@ fn test_render_javascript_with_package() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.javascript = {
-            enable = true;
-            package = pkgs.nodejs_22;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    package = pkgs.nodejs_22;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -825,24 +469,8 @@ fn test_render_javascript_with_npm() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.javascript = {
-            enable = true;
-            npm.enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    npm.enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -857,24 +485,8 @@ fn test_render_javascript_with_pnpm() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.javascript = {
-            enable = true;
-            pnpm.enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    pnpm.enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -889,24 +501,8 @@ fn test_render_javascript_with_yarn() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.javascript = {
-            enable = true;
-            yarn.enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    yarn.enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -921,24 +517,8 @@ fn test_render_javascript_with_corepack() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.javascript = {
-            enable = true;
-            corepack.enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    corepack.enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -953,24 +533,8 @@ fn test_render_javascript_with_bun() {
         tools: vec!["git".to_string()],
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
-    let expected = r#"
-        { pkgs, ... }:
-
-        {
-          packages = [
-            pkgs.git
-          ];
-
-          languages.javascript = {
-            enable = true;
-            bun.enable = true;
-          };
-        }
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    bun.enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -985,15 +549,8 @@ fn test_render_devenv_yaml_for_javascript() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
-    let expected = r#"
-        inputs:
-          nixpkgs:
-            url: github:cachix/devenv-nixpkgs/rolling
-        "#;
-    assert_eq!(
-        nomalize_whitespace(expected),
-        nomalize_whitespace(&devenv_conf)
-    )
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n";
+    assert_eq!(expected, devenv_conf)
 }
 
 #[test]
@@ -1001,9 +558,9 @@ fn test_render_envrc() {
     let envrc = render_envrc();
     let expected = r#"
         #!/usr/bin/env bash
-        
+
         eval "$(devenv direnvrc)"
-        
+
         # You can pass flags to the devenv command
         # For example: use devenv --impure --option services.postgres.enable:bool true
         use devenv

@@ -6,8 +6,8 @@
     pkgs.{{ tool }}
     {%- endfor %}
   ];
+{%- if project_ctx.language.name == "rust" %}
 
-  {% if project_ctx.language.name == "rust" -%}
   languages.rust = {
     enable = true;
 
@@ -35,9 +35,9 @@
     ];
     {%- endif %}
   };
-  {%- endif %}
+{%- endif %}
+{%- if project_ctx.language.name == "python" %}
 
-  {% if project_ctx.language.name == "python" -%}
   languages.python = {
     enable = true;
 
@@ -61,9 +61,9 @@
     venv.quiet = {{ project_ctx.language.venv_quiet }};
     {%- endif %}
   };
-  {%- endif %}
+{%- endif %}
+{%- if project_ctx.language.name == "go" %}
 
-  {% if project_ctx.language.name == "go" -%}
   languages.go = {
     enable = true;
 
@@ -75,9 +75,9 @@
     package = {{ project_ctx.language.package }};
     {%- endif %}
   };
-  {%- endif %}
+{%- endif %}
+{%- if project_ctx.language.name == "java" %}
 
-  {% if project_ctx.language.name == "java" -%}
   languages.java = {
     enable = true;
 
@@ -93,9 +93,9 @@
     maven.enable = {{ project_ctx.language.maven_enable }};
     {%- endif %}
   };
-  {%- endif %}
+{%- endif %}
+{%- if project_ctx.language.name == "javascript" %}
 
-  {% if project_ctx.language.name == "javascript" -%}
   languages.javascript = {
     enable = true;
 
@@ -123,5 +123,5 @@
     bun.enable = true;
     {%- endif %}
   };
-  {%- endif %}
+{%- endif %}
 }
