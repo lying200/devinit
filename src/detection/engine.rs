@@ -1,25 +1,20 @@
 use std::{io, path::Path};
 
 use super::detectors::run_detectors;
-use super::types::{DetectionOutcome, LanguageCandidate};
+use super::types::DetectionOutcome;
 use crate::schema::Language;
 
 pub fn detect_project(target_dir: &Path) -> io::Result<DetectionOutcome> {
-    let candidates = run_detectors(target_dir)?;
-    Ok(select_primary_candidate(candidates))
-}
-
-pub fn select_primary_candidate(candidates: Vec<LanguageCandidate>) -> DetectionOutcome {
-    let mut candidates = candidates;
-    candidates.sort_by_key(priority_key);
-
-    match candidates.into_iter().next() {
-        Some(candidate) => DetectionOutcome::Match { candidate },
-        None => DetectionOutcome::NoMatch,
+    let mut candidates = run_detectors(target_dir)?;
+    if candidates.is_empty() {
+        Ok(DetectionOutcome::NoMatch)
+    } else {
+        candidates.sort_by_key(priority_key);
+        Ok(DetectionOutcome::Matches { candidates })
     }
 }
 
-fn priority_key(candidate: &LanguageCandidate) -> usize {
+fn priority_key(candidate: &super::types::LanguageCandidate) -> usize {
     match candidate.language {
         Language::Rust { .. } => 0,
         Language::Python { .. } => 1,

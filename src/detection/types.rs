@@ -17,5 +17,5 @@ pub struct LanguageCandidate {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DetectionOutcome {
     NoMatch,
-    Match { candidate: LanguageCandidate },
+    Matches { candidates: Vec<LanguageCandidate> },
 }

@@ -30,23 +30,25 @@ pub fn prompt_ignore_mode() -> IgnoreMode {
     ignore_mode_from_selection(selection)
 }
 
-pub fn prompt_language_choice() -> LanguageChoice {
+pub fn prompt_language_choices() -> Vec<LanguageChoice> {
     let options = vec!["Rust", "Python", "Go", "Java", "JavaScript"];
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select language")
-        .default(0)
+    let selections = MultiSelect::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select language(s)")
         .items(&options)
         .interact()
         .expect("select err");
 
-    match selection {
-        0 => LanguageChoice::Rust,
-        1 => LanguageChoice::Python,
-        2 => LanguageChoice::Go,
-        3 => LanguageChoice::Java,
-        4 => LanguageChoice::JavaScript,
-        _ => unreachable!(),
-    }
+    selections
+        .iter()
+        .map(|&i| match i {
+            0 => LanguageChoice::Rust,
+            1 => LanguageChoice::Python,
+            2 => LanguageChoice::Go,
+            3 => LanguageChoice::Java,
+            4 => LanguageChoice::JavaScript,
+            _ => unreachable!(),
+        })
+        .collect()
 }
 
 pub fn prompt_language_config(choice: LanguageChoice) -> Language {
@@ -76,13 +78,27 @@ pub fn format_detected_summary(candidate: &LanguageCandidate) -> String {
     lines.join("\n")
 }
 
-pub fn confirm_detected_config(candidate: &LanguageCandidate) -> bool {
-    println!("{}", format_detected_summary(candidate));
-    Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Use detected config?")
-        .default(true)
+pub fn confirm_detected_configs(candidates: &[LanguageCandidate]) -> Vec<usize> {
+    let labels: Vec<String> = candidates
+        .iter()
+        .map(|c| {
+            let name = detected_language_name(&c.language);
+            let detail = detected_primary_field(c).unwrap_or_default();
+            if detail.is_empty() {
+                name.to_string()
+            } else {
+                format!("{name} ({detail})")
+            }
+        })
+        .collect();
+    let defaults: Vec<bool> = vec![true; candidates.len()];
+
+    MultiSelect::with_theme(&ColorfulTheme::default())
+        .with_prompt("Detected languages - select which to use")
+        .items(&labels)
+        .defaults(&defaults)
         .interact()
-        .expect("interact err exit")
+        .expect("interact err")
 }
 
 fn detected_language_name(language: &Language) -> &'static str {

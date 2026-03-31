@@ -6,7 +6,7 @@ use devinit::{
     git_ignore::{apply_ignore_mode, find_git_repo_root},
     init_guard::detect_existing_environment,
     prompt::{
-        confirm_detected_config, prompt_ignore_mode, prompt_language_choice,
+        confirm_detected_configs, prompt_ignore_mode, prompt_language_choices,
         prompt_language_config,
     },
     resolution::{ResolutionPlan, plan_language_resolution},
@@ -39,8 +39,8 @@ fn main() {
         }
     }
 
-    let language = match resolve_language_config(&target_dir, cli.lang) {
-        Ok(language) => language,
+    let languages = match resolve_languages_config(&target_dir, &cli.lang) {
+        Ok(languages) => languages,
         Err(e) => {
             eprint!("resolve language config err: {e}");
             std::process::exit(1);
@@ -48,7 +48,7 @@ fn main() {
     };
 
     let ctx = ProjectContext {
-        language,
+        languages,
         services: vec![],
         tools: vec![],
     };
@@ -85,23 +85,35 @@ fn main() {
     println!("use \"direnv allow\" to activate the environment.")
 }
 
-fn resolve_language_config(target_dir: &std::path::Path, cli_lang: Option<LanguageChoice>) -> std::io::Result<devinit::schema::Language> {
-    let detection = if cli_lang.is_none() {
+fn resolve_languages_config(
+    target_dir: &std::path::Path,
+    cli_langs: &[LanguageChoice],
+) -> std::io::Result<Vec<devinit::schema::Language>> {
+    let detection = if cli_langs.is_empty() {
         detect_project(target_dir)?
     } else {
         DetectionOutcome::NoMatch
     };
 
-    let use_detected = match &detection {
-        DetectionOutcome::Match { candidate } => confirm_detected_config(candidate),
-        DetectionOutcome::NoMatch => false,
+    let confirmed_indices = match &detection {
+        DetectionOutcome::Matches { candidates } => confirm_detected_configs(candidates),
+        DetectionOutcome::NoMatch => vec![],
     };
 
-    let plan = plan_language_resolution(cli_lang, detection, use_detected);
+    let plan = plan_language_resolution(cli_langs, detection, &confirmed_indices);
 
     Ok(match plan {
-        ResolutionPlan::Explicit(choice) => prompt_language_config(choice),
-        ResolutionPlan::UseDetected(language) => language,
-        ResolutionPlan::PromptManual => prompt_language_config(prompt_language_choice()),
+        ResolutionPlan::Explicit(choices) => choices
+            .iter()
+            .map(|&c| prompt_language_config(c))
+            .collect(),
+        ResolutionPlan::UseDetected(languages) => languages,
+        ResolutionPlan::PromptManual => {
+            let choices = prompt_language_choices();
+            choices
+                .iter()
+                .map(|&c| prompt_language_config(c))
+                .collect()
+        }
     })
 }

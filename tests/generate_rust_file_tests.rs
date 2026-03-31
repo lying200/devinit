@@ -3,12 +3,12 @@ use devinit::{generator::plan_files, schema::ProjectContext};
 #[test]
 fn test_plan_files_for_rust_project() {
     let ctx = ProjectContext {
-        language: devinit::schema::Language::Rust {
+        languages: vec![ devinit::schema::Language::Rust {
             channel: Some("stable".to_string()),
             version: Some("1.81.0".to_string()),
             components: Some(vec!["rustfmt".to_string()]),
             targets: Some(vec!["x86_64-unknown-linux-gnu".to_string()]),
-        },
+        }],
         services: Vec::new(),
         tools: vec!["git".to_string()],
     };
@@ -47,11 +47,11 @@ fn test_plan_files_for_rust_project() {
 #[test]
 fn test_plan_files_for_javascript_project() {
     let ctx = ProjectContext {
-        language: devinit::schema::Language::JavaScript {
+        languages: vec![ devinit::schema::Language::JavaScript {
             package: Some("pkgs.nodejs_22".to_string()),
             package_manager: Some("pnpm".to_string()),
             corepack_enable: Some(true),
-        },
+        }],
         services: Vec::new(),
         tools: vec!["git".to_string()],
     };
@@ -86,11 +86,11 @@ fn test_plan_files_for_javascript_project() {
 #[test]
 fn test_plan_files_for_java_project() {
     let ctx = ProjectContext {
-        language: devinit::schema::Language::Java {
+        languages: vec![ devinit::schema::Language::Java {
             jdk_package: Some("pkgs.jdk17".to_string()),
             gradle_enable: Some(true),
             maven_enable: Some(true),
-        },
+        }],
         services: Vec::new(),
         tools: vec!["git".to_string()],
     };
@@ -125,10 +125,10 @@ fn test_plan_files_for_java_project() {
 #[test]
 fn test_plan_files_for_go_project() {
     let ctx = ProjectContext {
-        language: devinit::schema::Language::Go {
+        languages: vec![ devinit::schema::Language::Go {
             version: Some("1.22.0".to_string()),
             package: Some("pkgs.go_1_24".to_string()),
-        },
+        }],
         services: Vec::new(),
         tools: vec!["git".to_string()],
     };
@@ -159,13 +159,13 @@ fn test_plan_files_for_go_project() {
 #[test]
 fn test_plan_files_for_python_project() {
     let ctx = ProjectContext {
-        language: devinit::schema::Language::Python {
+        languages: vec![ devinit::schema::Language::Python {
             version: Some("3.11".to_string()),
             package: Some("pkgs.python311".to_string()),
             uv_enable: Some(true),
             venv_enable: Some(true),
             venv_quiet: Some(true),
-        },
+        }],
         services: Vec::new(),
         tools: vec!["git".to_string()],
     };

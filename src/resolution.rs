@@ -6,25 +6,32 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ResolutionPlan {
-    Explicit(LanguageChoice),
-    UseDetected(Language),
+    Explicit(Vec<LanguageChoice>),
+    UseDetected(Vec<Language>),
     PromptManual,
 }
 
 pub fn plan_language_resolution(
-    cli_lang: Option<LanguageChoice>,
+    cli_langs: &[LanguageChoice],
     detection: DetectionOutcome,
-    use_detected: bool,
+    confirmed_indices: &[usize],
 ) -> ResolutionPlan {
-    if let Some(choice) = cli_lang {
-        return ResolutionPlan::Explicit(choice);
+    if !cli_langs.is_empty() {
+        return ResolutionPlan::Explicit(cli_langs.to_vec());
     }
 
     match detection {
         DetectionOutcome::NoMatch => ResolutionPlan::PromptManual,
-        DetectionOutcome::Match { candidate } if use_detected => {
-            ResolutionPlan::UseDetected(candidate.language)
+        DetectionOutcome::Matches { candidates } => {
+            let confirmed: Vec<Language> = confirmed_indices
+                .iter()
+                .filter_map(|&i| candidates.get(i).map(|c| c.language.clone()))
+                .collect();
+            if confirmed.is_empty() {
+                ResolutionPlan::PromptManual
+            } else {
+                ResolutionPlan::UseDetected(confirmed)
+            }
         }
-        DetectionOutcome::Match { .. } => ResolutionPlan::PromptManual,
     }
 }

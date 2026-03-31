@@ -1,6 +1,5 @@
 use devinit::detection::{
     DetectionConfidence, DetectionOutcome, LanguageCandidate, detect_project,
-    engine::select_primary_candidate,
 };
 use devinit::schema::Language;
 use std::{
@@ -23,7 +22,7 @@ fn create_dir(path: &Path) {
 }
 
 #[test]
-fn detection_types_support_single_language_match() {
+fn detection_types_support_multiple_language_matches() {
     let candidate = LanguageCandidate {
         language: Language::Rust {
             channel: None,
@@ -35,65 +34,28 @@ fn detection_types_support_single_language_match() {
         reasons: vec!["found Cargo.toml".to_string()],
     };
 
-    let outcome = DetectionOutcome::Match { candidate };
+    let outcome = DetectionOutcome::Matches {
+        candidates: vec![candidate],
+    };
 
     match outcome {
-        DetectionOutcome::Match { candidate } => {
-            assert_eq!(candidate.confidence, DetectionConfidence::High);
-            assert_eq!(candidate.reasons, vec!["found Cargo.toml"]);
+        DetectionOutcome::Matches { candidates } => {
+            assert_eq!(candidates.len(), 1);
+            assert_eq!(candidates[0].confidence, DetectionConfidence::High);
+            assert_eq!(candidates[0].reasons, vec!["found Cargo.toml"]);
         }
-        DetectionOutcome::NoMatch => panic!("expected match"),
+        DetectionOutcome::NoMatch => panic!("expected matches"),
     }
 }
 
 #[test]
-fn select_primary_candidate_returns_no_match_for_empty_list() {
-    let outcome = select_primary_candidate(Vec::new());
+fn detect_project_returns_no_match_for_empty_dir() {
+    let dir = unique_test_dir("empty");
+    create_dir(&dir);
+
+    let outcome = detect_project(&dir).unwrap();
 
     assert_eq!(outcome, DetectionOutcome::NoMatch);
-}
-
-#[test]
-fn select_primary_candidate_returns_single_candidate() {
-    let candidate = LanguageCandidate {
-        language: Language::Go {
-            version: Some("1.24".to_string()),
-            package: None,
-        },
-        confidence: DetectionConfidence::High,
-        reasons: vec!["found go.mod".to_string()],
-    };
-
-    let outcome = select_primary_candidate(vec![candidate.clone()]);
-
-    assert_eq!(outcome, DetectionOutcome::Match { candidate });
-}
-
-#[test]
-fn select_primary_candidate_prefers_rust_over_javascript() {
-    let rust = LanguageCandidate {
-        language: Language::Rust {
-            channel: None,
-            version: Some("1.76.0".to_string()),
-            components: None,
-            targets: None,
-        },
-        confidence: DetectionConfidence::High,
-        reasons: vec!["found Cargo.toml".to_string()],
-    };
-    let javascript = LanguageCandidate {
-        language: Language::JavaScript {
-            package: None,
-            package_manager: Some("pnpm".to_string()),
-            corepack_enable: None,
-        },
-        confidence: DetectionConfidence::High,
-        reasons: vec!["found package.json".to_string()],
-    };
-
-    let outcome = select_primary_candidate(vec![javascript, rust.clone()]);
-
-    assert_eq!(outcome, DetectionOutcome::Match { candidate: rust });
 }
 
 #[test]
@@ -104,19 +66,58 @@ fn detect_project_returns_rust_match_for_cargo_project() {
 
     let outcome = detect_project(&dir).unwrap();
 
-    assert_eq!(
-        outcome,
-        DetectionOutcome::Match {
-            candidate: LanguageCandidate {
-                language: Language::Rust {
-                    channel: None,
-                    version: None,
-                    components: None,
-                    targets: None,
-                },
-                confidence: DetectionConfidence::High,
-                reasons: vec!["found Cargo.toml".to_string()],
-            }
+    match outcome {
+        DetectionOutcome::Matches { candidates } => {
+            assert!(candidates.len() >= 1);
+            assert!(matches!(candidates[0].language, Language::Rust { .. }));
         }
-    );
+        DetectionOutcome::NoMatch => panic!("expected matches"),
+    }
+}
+
+#[test]
+fn detect_project_returns_multiple_languages_for_mixed_project() {
+    let dir = unique_test_dir("mixed-go-js");
+    create_dir(&dir);
+    fs::write(dir.join("go.mod"), "module example.com/demo\n\ngo 1.22\n").unwrap();
+    fs::write(dir.join("package.json"), r#"{"name": "frontend"}"#).unwrap();
+
+    let outcome = detect_project(&dir).unwrap();
+
+    match outcome {
+        DetectionOutcome::Matches { candidates } => {
+            assert_eq!(candidates.len(), 2);
+            let names: Vec<&str> = candidates
+                .iter()
+                .map(|c| match &c.language {
+                    Language::Go { .. } => "go",
+                    Language::JavaScript { .. } => "javascript",
+                    _ => "other",
+                })
+                .collect();
+            assert!(names.contains(&"go"));
+            assert!(names.contains(&"javascript"));
+        }
+        DetectionOutcome::NoMatch => panic!("expected matches"),
+    }
+}
+
+#[test]
+fn detect_project_sorts_candidates_by_priority() {
+    let dir = unique_test_dir("priority-rust-js");
+    create_dir(&dir);
+    fs::write(dir.join("Cargo.toml"), "[package]\nname = \"demo\"\n").unwrap();
+    fs::write(dir.join("package.json"), r#"{"name": "frontend"}"#).unwrap();
+
+    let outcome = detect_project(&dir).unwrap();
+
+    match outcome {
+        DetectionOutcome::Matches { candidates } => {
+            assert!(candidates.len() >= 2);
+            // Rust should come first (higher priority)
+            assert!(matches!(candidates[0].language, Language::Rust { .. }));
+            assert!(matches!(candidates[1].language, Language::JavaScript { .. }));
+        }
+        DetectionOutcome::NoMatch => panic!("expected matches"),
+    }
 }

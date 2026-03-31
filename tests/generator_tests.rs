@@ -8,12 +8,12 @@ fn nomalize_whitespace(s: &str) -> String {
 #[test]
 fn test_render_rust_base_without_tools_has_no_git_package() {
     let project_ctx = ProjectContext {
-        language: Language::Rust {
+        languages: vec![Language::Rust {
             channel: None,
             version: None,
             components: None,
             targets: None,
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -27,12 +27,12 @@ fn test_render_rust_base_without_tools_has_no_git_package() {
 #[test]
 fn test_render_rust_with_explicit_git_tool_includes_git_package() {
     let project_ctx = ProjectContext {
-        language: Language::Rust {
+        languages: vec![Language::Rust {
             channel: None,
             version: None,
             components: None,
             targets: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -45,12 +45,12 @@ fn test_render_rust_with_explicit_git_tool_includes_git_package() {
 #[test]
 fn test_render_rust_base() {
     let project_ctx = ProjectContext {
-        language: Language::Rust {
+        languages: vec![Language::Rust {
             channel: None,
             version: None,
             components: None,
             targets: None,
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -62,12 +62,12 @@ fn test_render_rust_base() {
 #[test]
 fn test_render_rust_with_channel() {
     let project_ctx = ProjectContext {
-        language: Language::Rust {
+        languages: vec![Language::Rust {
             channel: Some("stable".to_string()),
             version: None,
             components: None,
             targets: None,
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -79,12 +79,12 @@ fn test_render_rust_with_channel() {
 #[test]
 fn test_render_rust_with_version() {
     let project_ctx = ProjectContext {
-        language: Language::Rust {
+        languages: vec![Language::Rust {
             channel: None,
             version: Some("1.81.0".to_string()),
             components: None,
             targets: None,
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -96,12 +96,12 @@ fn test_render_rust_with_version() {
 #[test]
 fn test_render_rust_with_components() {
     let project_ctx = ProjectContext {
-        language: Language::Rust {
+        languages: vec![Language::Rust {
             channel: None,
             version: None,
             components: Some(vec!["clippy".to_string()]),
             targets: None,
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -113,12 +113,12 @@ fn test_render_rust_with_components() {
 #[test]
 fn test_render_rust_with_targets() {
     let project_ctx = ProjectContext {
-        language: Language::Rust {
+        languages: vec![Language::Rust {
             channel: None,
             version: None,
             components: None,
             targets: Some(vec!["wasm32-unknown-unknown".to_string()]),
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -130,12 +130,12 @@ fn test_render_rust_with_targets() {
 #[test]
 fn test_render_devenv_yaml() {
     let project_ctx = ProjectContext {
-        language: Language::Rust {
+        languages: vec![Language::Rust {
             channel: None,
             version: None,
             components: None,
             targets: None,
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -147,13 +147,13 @@ fn test_render_devenv_yaml() {
 #[test]
 fn test_render_python_base() {
     let project_ctx = ProjectContext {
-        language: Language::Python {
+        languages: vec![Language::Python {
             version: None,
             package: None,
             uv_enable: None,
             venv_enable: None,
             venv_quiet: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -165,13 +165,13 @@ fn test_render_python_base() {
 #[test]
 fn test_render_python_with_version() {
     let project_ctx = ProjectContext {
-        language: Language::Python {
+        languages: vec![Language::Python {
             version: Some("3.11".to_string()),
             package: None,
             uv_enable: None,
             venv_enable: None,
             venv_quiet: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -183,13 +183,13 @@ fn test_render_python_with_version() {
 #[test]
 fn test_render_python_with_package() {
     let project_ctx = ProjectContext {
-        language: Language::Python {
+        languages: vec![Language::Python {
             version: None,
             package: Some("pkgs.python311".to_string()),
             uv_enable: None,
             venv_enable: None,
             venv_quiet: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -201,13 +201,13 @@ fn test_render_python_with_package() {
 #[test]
 fn test_render_python_with_uv() {
     let project_ctx = ProjectContext {
-        language: Language::Python {
+        languages: vec![Language::Python {
             version: None,
             package: None,
             uv_enable: Some(true),
             venv_enable: None,
             venv_quiet: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -219,13 +219,13 @@ fn test_render_python_with_uv() {
 #[test]
 fn test_render_python_with_venv() {
     let project_ctx = ProjectContext {
-        language: Language::Python {
+        languages: vec![Language::Python {
             version: None,
             package: None,
             uv_enable: None,
             venv_enable: Some(true),
             venv_quiet: Some(true),
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -237,13 +237,13 @@ fn test_render_python_with_venv() {
 #[test]
 fn test_render_devenv_yaml_for_python_with_version() {
     let project_ctx = ProjectContext {
-        language: Language::Python {
+        languages: vec![Language::Python {
             version: Some("3.11".to_string()),
             package: None,
             uv_enable: None,
             venv_enable: None,
             venv_quiet: None,
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -255,13 +255,13 @@ fn test_render_devenv_yaml_for_python_with_version() {
 #[test]
 fn test_render_devenv_yaml_for_python_with_package_only() {
     let project_ctx = ProjectContext {
-        language: Language::Python {
+        languages: vec![Language::Python {
             version: None,
             package: Some("pkgs.python311".to_string()),
             uv_enable: None,
             venv_enable: None,
             venv_quiet: None,
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -273,10 +273,10 @@ fn test_render_devenv_yaml_for_python_with_package_only() {
 #[test]
 fn test_render_go_base() {
     let project_ctx = ProjectContext {
-        language: Language::Go {
+        languages: vec![Language::Go {
             version: None,
             package: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -288,10 +288,10 @@ fn test_render_go_base() {
 #[test]
 fn test_render_go_with_version() {
     let project_ctx = ProjectContext {
-        language: Language::Go {
+        languages: vec![Language::Go {
             version: Some("1.22.0".to_string()),
             package: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -303,10 +303,10 @@ fn test_render_go_with_version() {
 #[test]
 fn test_render_go_with_package() {
     let project_ctx = ProjectContext {
-        language: Language::Go {
+        languages: vec![Language::Go {
             version: None,
             package: Some("pkgs.go_1_24".to_string()),
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -318,10 +318,10 @@ fn test_render_go_with_package() {
 #[test]
 fn test_render_devenv_yaml_for_go_with_version() {
     let project_ctx = ProjectContext {
-        language: Language::Go {
+        languages: vec![Language::Go {
             version: Some("1.22.0".to_string()),
             package: None,
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -333,10 +333,10 @@ fn test_render_devenv_yaml_for_go_with_version() {
 #[test]
 fn test_render_devenv_yaml_for_go_with_package_only() {
     let project_ctx = ProjectContext {
-        language: Language::Go {
+        languages: vec![Language::Go {
             version: None,
             package: Some("pkgs.go_1_24".to_string()),
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -348,11 +348,11 @@ fn test_render_devenv_yaml_for_go_with_package_only() {
 #[test]
 fn test_render_java_base() {
     let project_ctx = ProjectContext {
-        language: Language::Java {
+        languages: vec![Language::Java {
             jdk_package: None,
             gradle_enable: None,
             maven_enable: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -364,11 +364,11 @@ fn test_render_java_base() {
 #[test]
 fn test_render_java_with_jdk_package() {
     let project_ctx = ProjectContext {
-        language: Language::Java {
+        languages: vec![Language::Java {
             jdk_package: Some("pkgs.jdk17".to_string()),
             gradle_enable: None,
             maven_enable: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -380,11 +380,11 @@ fn test_render_java_with_jdk_package() {
 #[test]
 fn test_render_java_with_gradle() {
     let project_ctx = ProjectContext {
-        language: Language::Java {
+        languages: vec![Language::Java {
             jdk_package: None,
             gradle_enable: Some(true),
             maven_enable: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -396,11 +396,11 @@ fn test_render_java_with_gradle() {
 #[test]
 fn test_render_java_with_maven() {
     let project_ctx = ProjectContext {
-        language: Language::Java {
+        languages: vec![Language::Java {
             jdk_package: None,
             gradle_enable: None,
             maven_enable: Some(true),
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -412,11 +412,11 @@ fn test_render_java_with_maven() {
 #[test]
 fn test_render_devenv_yaml_for_java() {
     let project_ctx = ProjectContext {
-        language: Language::Java {
+        languages: vec![Language::Java {
             jdk_package: Some("pkgs.jdk17".to_string()),
             gradle_enable: Some(true),
             maven_enable: Some(true),
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
@@ -428,11 +428,11 @@ fn test_render_devenv_yaml_for_java() {
 #[test]
 fn test_render_javascript_base() {
     let project_ctx = ProjectContext {
-        language: Language::JavaScript {
+        languages: vec![Language::JavaScript {
             package: None,
             package_manager: None,
             corepack_enable: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -444,11 +444,11 @@ fn test_render_javascript_base() {
 #[test]
 fn test_render_javascript_with_package() {
     let project_ctx = ProjectContext {
-        language: Language::JavaScript {
+        languages: vec![Language::JavaScript {
             package: Some("pkgs.nodejs_22".to_string()),
             package_manager: None,
             corepack_enable: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -460,11 +460,11 @@ fn test_render_javascript_with_package() {
 #[test]
 fn test_render_javascript_with_npm() {
     let project_ctx = ProjectContext {
-        language: Language::JavaScript {
+        languages: vec![Language::JavaScript {
             package: None,
             package_manager: Some("npm".to_string()),
             corepack_enable: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -476,11 +476,11 @@ fn test_render_javascript_with_npm() {
 #[test]
 fn test_render_javascript_with_pnpm() {
     let project_ctx = ProjectContext {
-        language: Language::JavaScript {
+        languages: vec![Language::JavaScript {
             package: None,
             package_manager: Some("pnpm".to_string()),
             corepack_enable: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -492,11 +492,11 @@ fn test_render_javascript_with_pnpm() {
 #[test]
 fn test_render_javascript_with_yarn() {
     let project_ctx = ProjectContext {
-        language: Language::JavaScript {
+        languages: vec![Language::JavaScript {
             package: None,
             package_manager: Some("yarn".to_string()),
             corepack_enable: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -508,11 +508,11 @@ fn test_render_javascript_with_yarn() {
 #[test]
 fn test_render_javascript_with_corepack() {
     let project_ctx = ProjectContext {
-        language: Language::JavaScript {
+        languages: vec![Language::JavaScript {
             package: None,
             package_manager: None,
             corepack_enable: Some(true),
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -524,11 +524,11 @@ fn test_render_javascript_with_corepack() {
 #[test]
 fn test_render_javascript_with_bun() {
     let project_ctx = ProjectContext {
-        language: Language::JavaScript {
+        languages: vec![Language::JavaScript {
             package: None,
             package_manager: Some("bun".to_string()),
             corepack_enable: None,
-        },
+        }],
         services: vec![],
         tools: vec!["git".to_string()],
     };
@@ -540,17 +540,115 @@ fn test_render_javascript_with_bun() {
 #[test]
 fn test_render_devenv_yaml_for_javascript() {
     let project_ctx = ProjectContext {
-        language: Language::JavaScript {
+        languages: vec![Language::JavaScript {
             package: Some("pkgs.nodejs_22".to_string()),
             package_manager: Some("pnpm".to_string()),
             corepack_enable: Some(true),
-        },
+        }],
         services: vec![],
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
     let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n";
     assert_eq!(expected, devenv_conf)
+}
+
+// Multi-language tests
+
+#[test]
+fn test_render_multi_language_go_and_javascript() {
+    let project_ctx = ProjectContext {
+        languages: vec![
+            Language::Go {
+                version: Some("1.22.0".to_string()),
+                package: None,
+            },
+            Language::JavaScript {
+                package: None,
+                package_manager: Some("pnpm".to_string()),
+                corepack_enable: None,
+            },
+        ],
+        services: vec![],
+        tools: vec!["git".to_string()],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.go = {\n    enable = true;\n    version = \"1.22.0\";\n  };\n\n  languages.javascript = {\n    enable = true;\n    pnpm.enable = true;\n  };\n}\n";
+    assert_eq!(expected, devenv_conf)
+}
+
+#[test]
+fn test_render_devenv_yaml_multi_language_go_version_and_javascript() {
+    let project_ctx = ProjectContext {
+        languages: vec![
+            Language::Go {
+                version: Some("1.22.0".to_string()),
+                package: None,
+            },
+            Language::JavaScript {
+                package: None,
+                package_manager: None,
+                corepack_enable: None,
+            },
+        ],
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_yaml(&project_ctx);
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  go-overlay:\n    url: github:nix-community/go-overlay\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
+    assert_eq!(expected, devenv_conf)
+}
+
+#[test]
+fn test_render_multi_language_rust_and_javascript() {
+    let project_ctx = ProjectContext {
+        languages: vec![
+            Language::Rust {
+                channel: Some("stable".to_string()),
+                version: None,
+                components: None,
+                targets: None,
+            },
+            Language::JavaScript {
+                package: None,
+                package_manager: Some("npm".to_string()),
+                corepack_enable: None,
+            },
+        ],
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    assert!(devenv_conf.contains("languages.rust"));
+    assert!(devenv_conf.contains("languages.javascript"));
+    assert!(devenv_conf.contains("channel = \"stable\""));
+    assert!(devenv_conf.contains("npm.enable = true"));
+}
+
+#[test]
+fn test_render_devenv_yaml_multi_language_rust_and_python_with_version() {
+    let project_ctx = ProjectContext {
+        languages: vec![
+            Language::Rust {
+                channel: None,
+                version: None,
+                components: None,
+                targets: None,
+            },
+            Language::Python {
+                version: Some("3.11".to_string()),
+                package: None,
+                uv_enable: None,
+                venv_enable: None,
+                venv_quiet: None,
+            },
+        ],
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_yaml(&project_ctx);
+    assert!(devenv_conf.contains("rust-overlay"));
+    assert!(devenv_conf.contains("nixpkgs-python"));
 }
 
 #[test]

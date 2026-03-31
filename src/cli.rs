@@ -6,7 +6,7 @@ use clap::{Parser, ValueEnum};
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
     #[arg(short, long)]
-    pub lang: Option<LanguageChoice>,
+    pub lang: Vec<LanguageChoice>,
 
     #[arg(default_value = ".")]
     pub path: PathBuf,

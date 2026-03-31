@@ -3,7 +3,7 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ProjectContext {
-    pub language: Language,
+    pub languages: Vec<Language>,
     // 项目依赖服务，如 pg、redis 等
     pub services: Vec<Service>,
     // 项目依赖工具，如 git 等
