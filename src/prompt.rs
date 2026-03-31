@@ -123,6 +123,36 @@ pub fn confirm_detected_configs(candidates: &[LanguageCandidate]) -> Vec<usize> 
         .expect("interact err")
 }
 
+pub fn prompt_modify_detected(languages: Vec<Language>) -> Vec<Language> {
+    let theme = ColorfulTheme::default();
+    languages
+        .into_iter()
+        .map(|lang| {
+            let name = detected_language_name(&lang);
+            let modify = Confirm::with_theme(&theme)
+                .with_prompt(format!("Modify {name} config?"))
+                .default(false)
+                .interact()
+                .expect("interact err");
+            if modify {
+                prompt_language_config(language_to_choice(&lang))
+            } else {
+                lang
+            }
+        })
+        .collect()
+}
+
+fn language_to_choice(language: &Language) -> LanguageChoice {
+    match language {
+        Language::Rust { .. } => LanguageChoice::Rust,
+        Language::Python { .. } => LanguageChoice::Python,
+        Language::Go { .. } => LanguageChoice::Go,
+        Language::Java { .. } => LanguageChoice::Java,
+        Language::JavaScript { .. } => LanguageChoice::JavaScript,
+    }
+}
+
 fn detected_language_name(language: &Language) -> &'static str {
     match language {
         Language::Rust { .. } => "Rust",

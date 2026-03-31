@@ -9,7 +9,7 @@ use devinit::{
     init_guard::detect_existing_environment,
     prompt::{
         confirm_detected_configs, prompt_ignore_mode, prompt_language_choices,
-        prompt_language_config,
+        prompt_language_config, prompt_modify_detected,
     },
     resolution::{ResolutionPlan, plan_language_resolution},
     schema::{Language, ProjectContext},
@@ -134,7 +134,7 @@ fn resolve_languages_config(
             .iter()
             .map(|&c| prompt_language_config(c))
             .collect(),
-        ResolutionPlan::UseDetected(languages) => languages,
+        ResolutionPlan::UseDetected(languages) => prompt_modify_detected(languages),
         ResolutionPlan::PromptManual => {
             let choices = prompt_language_choices();
             choices
