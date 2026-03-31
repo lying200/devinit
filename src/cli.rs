@@ -8,6 +8,10 @@ pub struct Cli {
     #[arg(short, long)]
     pub lang: Vec<LanguageChoice>,
 
+    /// Non-interactive mode: accept detected config and use defaults
+    #[arg(short, long)]
+    pub yes: bool,
+
     #[arg(default_value = ".")]
     pub path: PathBuf,
 }

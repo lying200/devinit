@@ -10,7 +10,7 @@ use devinit::{
         prompt_language_config,
     },
     resolution::{ResolutionPlan, plan_language_resolution},
-    schema::ProjectContext,
+    schema::{Language, ProjectContext},
 };
 
 fn main() {
@@ -39,13 +39,18 @@ fn main() {
         }
     }
 
-    let languages = match resolve_languages_config(&target_dir, &cli.lang) {
+    let languages = match resolve_languages_config(&target_dir, &cli.lang, cli.yes) {
         Ok(languages) => languages,
         Err(e) => {
             eprint!("resolve language config err: {e}");
             std::process::exit(1);
         }
     };
+
+    if languages.is_empty() {
+        eprintln!("no languages selected, nothing to generate");
+        std::process::exit(1);
+    }
 
     let ctx = ProjectContext {
         languages,
@@ -57,6 +62,12 @@ fn main() {
     if let Err(e) = write_files(&target_dir, &output_file) {
         eprint!("generate devenv file err: {e}");
         std::process::exit(1);
+    }
+
+    if cli.yes {
+        println!("devenv init success!");
+        println!("use \"direnv allow\" to activate the environment.");
+        return;
     }
 
     if find_git_repo_root(&target_dir).is_none() {
@@ -88,13 +99,33 @@ fn main() {
 fn resolve_languages_config(
     target_dir: &std::path::Path,
     cli_langs: &[LanguageChoice],
-) -> std::io::Result<Vec<devinit::schema::Language>> {
-    let detection = if cli_langs.is_empty() {
-        detect_project(target_dir)?
-    } else {
-        DetectionOutcome::NoMatch
-    };
+    non_interactive: bool,
+) -> std::io::Result<Vec<Language>> {
+    // --lang provided: use explicit languages
+    if !cli_langs.is_empty() {
+        if non_interactive {
+            return Ok(cli_langs.iter().map(|&c| default_language(c)).collect());
+        }
+        return Ok(cli_langs.iter().map(|&c| prompt_language_config(c)).collect());
+    }
 
+    // Run detection
+    let detection = detect_project(target_dir)?;
+
+    // --yes: accept all detected languages with default config
+    if non_interactive {
+        return Ok(match detection {
+            DetectionOutcome::Matches { candidates } => {
+                candidates.into_iter().map(|c| c.language).collect()
+            }
+            DetectionOutcome::NoMatch => {
+                eprintln!("no languages detected and --yes specified, cannot proceed without --lang");
+                std::process::exit(1);
+            }
+        });
+    }
+
+    // Interactive flow
     let confirmed_indices = match &detection {
         DetectionOutcome::Matches { candidates } => confirm_detected_configs(candidates),
         DetectionOutcome::NoMatch => vec![],
@@ -116,4 +147,36 @@ fn resolve_languages_config(
                 .collect()
         }
     })
+}
+
+fn default_language(choice: LanguageChoice) -> Language {
+    match choice {
+        LanguageChoice::Rust => Language::Rust {
+            channel: None,
+            version: None,
+            components: None,
+            targets: None,
+        },
+        LanguageChoice::Python => Language::Python {
+            version: None,
+            package: None,
+            uv_enable: None,
+            venv_enable: None,
+            venv_quiet: None,
+        },
+        LanguageChoice::Go => Language::Go {
+            version: None,
+            package: None,
+        },
+        LanguageChoice::Java => Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: None,
+        },
+        LanguageChoice::JavaScript => Language::JavaScript {
+            package: None,
+            package_manager: None,
+            corepack_enable: None,
+        },
+    }
 }
