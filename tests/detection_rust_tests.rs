@@ -55,6 +55,64 @@ fn rust_detector_detects_rust_from_cargo_toml() {
 }
 
 #[test]
+fn rust_detector_reads_version_from_rust_toolchain_toml() {
+    let dir = unique_test_dir("toolchain-version");
+    create_dir(&dir);
+    fs::write(dir.join("Cargo.toml"), "[package]\nname = \"demo\"\n").unwrap();
+    fs::write(
+        dir.join("rust-toolchain.toml"),
+        "[toolchain]\nchannel = \"1.81.0\"\n",
+    )
+    .unwrap();
+
+    let result = detect(&dir).unwrap();
+
+    assert_eq!(
+        result,
+        Some(LanguageCandidate {
+            language: Language::Rust {
+                channel: None,
+                version: Some("1.81.0".to_string()),
+                components: None,
+                targets: None,
+            },
+            confidence: DetectionConfidence::High,
+            reasons: vec![
+                "found Cargo.toml".to_string(),
+                "found rust-toolchain.toml".to_string(),
+            ],
+        })
+    );
+}
+
+#[test]
+fn rust_detector_handles_empty_toolchain_toml() {
+    let dir = unique_test_dir("toolchain-empty");
+    create_dir(&dir);
+    fs::write(dir.join("Cargo.toml"), "[package]\nname = \"demo\"\n").unwrap();
+    fs::write(dir.join("rust-toolchain.toml"), "").unwrap();
+
+    let result = detect(&dir).unwrap();
+
+    assert_eq!(
+        result,
+        Some(LanguageCandidate {
+            language: Language::Rust {
+                channel: None,
+                version: None,
+                components: None,
+                targets: None,
+            },
+            confidence: DetectionConfidence::High,
+            reasons: vec![
+                "found Cargo.toml".to_string(),
+                "found rust-toolchain.toml".to_string(),
+            ],
+        })
+    );
+}
+
+#[test]
 fn rust_detector_reads_channel_from_rust_toolchain_toml() {
     let dir = unique_test_dir("toolchain");
     create_dir(&dir);

@@ -51,9 +51,11 @@ pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
 }
 
 /// 从 pyproject.toml 的 requires-python 字段提取最低版本。
+///
 /// 只处理简单明确的格式：
 /// - `requires-python = ">=3.11"`
 /// - `requires-python = ">=3.11.0"`
+///
 /// 复杂范围（含 `,`、`||`、`<` 等）跳过，返回 None。
 fn parse_requires_python(content: &str) -> Option<String> {
     for line in content.lines() {

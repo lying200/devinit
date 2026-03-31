@@ -97,7 +97,7 @@ fn resolve_languages_config(
     // --lang provided: use explicit languages
     if !cli_langs.is_empty() {
         if non_interactive {
-            return Ok(cli_langs.iter().map(|&c| default_language(c)).collect());
+            return Ok(cli_langs.iter().map(|c| c.to_default_language()).collect());
         }
         return Ok(cli_langs.iter().map(|&c| prompt_language_config(c)).collect());
     }
@@ -142,34 +142,3 @@ fn resolve_languages_config(
     })
 }
 
-fn default_language(choice: LanguageChoice) -> Language {
-    match choice {
-        LanguageChoice::Rust => Language::Rust {
-            channel: None,
-            version: None,
-            components: None,
-            targets: None,
-        },
-        LanguageChoice::Python => Language::Python {
-            version: None,
-            package: None,
-            uv_enable: None,
-            venv_enable: None,
-            venv_quiet: None,
-        },
-        LanguageChoice::Go => Language::Go {
-            version: None,
-            package: None,
-        },
-        LanguageChoice::Java => Language::Java {
-            jdk_package: None,
-            gradle_enable: None,
-            maven_enable: None,
-        },
-        LanguageChoice::JavaScript => Language::JavaScript {
-            package: None,
-            package_manager: None,
-            corepack_enable: None,
-        },
-    }
-}

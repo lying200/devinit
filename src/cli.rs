@@ -25,3 +25,38 @@ pub enum LanguageChoice {
     #[value(name = "javascript")]
     JavaScript,
 }
+
+impl LanguageChoice {
+    pub fn to_default_language(self) -> crate::schema::Language {
+        use crate::schema::Language;
+        match self {
+            LanguageChoice::Rust => Language::Rust {
+                channel: None,
+                version: None,
+                components: None,
+                targets: None,
+            },
+            LanguageChoice::Python => Language::Python {
+                version: None,
+                package: None,
+                uv_enable: None,
+                venv_enable: None,
+                venv_quiet: None,
+            },
+            LanguageChoice::Go => Language::Go {
+                version: None,
+                package: None,
+            },
+            LanguageChoice::Java => Language::Java {
+                jdk_package: None,
+                gradle_enable: None,
+                maven_enable: None,
+            },
+            LanguageChoice::JavaScript => Language::JavaScript {
+                package: None,
+                package_manager: None,
+                corepack_enable: None,
+            },
+        }
+    }
+}

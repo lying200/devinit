@@ -148,3 +148,46 @@ fn no_detection_match_falls_back_to_manual_flow() {
 
     assert_eq!(plan, ResolutionPlan::PromptManual);
 }
+
+#[test]
+fn to_default_language_returns_all_none_fields() {
+    let choices = vec![
+        LanguageChoice::Rust,
+        LanguageChoice::Python,
+        LanguageChoice::Go,
+        LanguageChoice::Java,
+        LanguageChoice::JavaScript,
+    ];
+    for choice in choices {
+        let lang = choice.to_default_language();
+        match lang {
+            Language::Rust { channel, version, components, targets } => {
+                assert!(channel.is_none());
+                assert!(version.is_none());
+                assert!(components.is_none());
+                assert!(targets.is_none());
+            }
+            Language::Python { version, package, uv_enable, venv_enable, venv_quiet } => {
+                assert!(version.is_none());
+                assert!(package.is_none());
+                assert!(uv_enable.is_none());
+                assert!(venv_enable.is_none());
+                assert!(venv_quiet.is_none());
+            }
+            Language::Go { version, package } => {
+                assert!(version.is_none());
+                assert!(package.is_none());
+            }
+            Language::Java { jdk_package, gradle_enable, maven_enable } => {
+                assert!(jdk_package.is_none());
+                assert!(gradle_enable.is_none());
+                assert!(maven_enable.is_none());
+            }
+            Language::JavaScript { package, package_manager, corepack_enable } => {
+                assert!(package.is_none());
+                assert!(package_manager.is_none());
+                assert!(corepack_enable.is_none());
+            }
+        }
+    }
+}

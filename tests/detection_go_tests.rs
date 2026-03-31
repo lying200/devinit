@@ -78,6 +78,27 @@ fn go_detector_normalizes_two_segment_version_to_three() {
 }
 
 #[test]
+fn go_detector_empty_go_mod_has_no_version() {
+    let dir = unique_test_dir("go-empty");
+    create_dir(&dir);
+    fs::write(dir.join("go.mod"), "").unwrap();
+
+    let result = detect(&dir).unwrap();
+
+    assert_eq!(
+        result,
+        Some(LanguageCandidate {
+            language: Language::Go {
+                version: None,
+                package: None,
+            },
+            confidence: DetectionConfidence::High,
+            reasons: vec!["found go.mod".to_string()],
+        })
+    );
+}
+
+#[test]
 fn go_detector_keeps_three_segment_version_as_is() {
     let dir = unique_test_dir("go-version-three-seg");
     create_dir(&dir);

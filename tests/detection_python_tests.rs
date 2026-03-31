@@ -205,6 +205,58 @@ fn python_detector_ignores_complex_requires_python_range() {
 }
 
 #[test]
+fn python_detector_empty_python_version_file_yields_none() {
+    let dir = unique_test_dir("empty-python-version");
+    create_dir(&dir);
+    fs::write(dir.join("pyproject.toml"), "[project]\nname = \"demo\"\n").unwrap();
+    fs::write(dir.join(".python-version"), "  \n").unwrap();
+
+    let result = detect(&dir).unwrap();
+
+    assert_eq!(
+        result,
+        Some(LanguageCandidate {
+            language: Language::Python {
+                version: None,
+                package: None,
+                uv_enable: None,
+                venv_enable: None,
+                venv_quiet: None,
+            },
+            confidence: DetectionConfidence::High,
+            reasons: vec![
+                "found pyproject.toml".to_string(),
+                "found .python-version".to_string(),
+            ],
+        })
+    );
+}
+
+#[test]
+fn python_detector_detects_from_requirements_txt_only() {
+    let dir = unique_test_dir("requirements-only");
+    create_dir(&dir);
+    fs::write(dir.join("requirements.txt"), "flask\n").unwrap();
+
+    let result = detect(&dir).unwrap();
+
+    assert_eq!(
+        result,
+        Some(LanguageCandidate {
+            language: Language::Python {
+                version: None,
+                package: None,
+                uv_enable: None,
+                venv_enable: None,
+                venv_quiet: None,
+            },
+            confidence: DetectionConfidence::Medium,
+            reasons: vec!["found requirements.txt".to_string()],
+        })
+    );
+}
+
+#[test]
 fn python_detector_dot_python_version_takes_precedence() {
     let dir = unique_test_dir("precedence");
     create_dir(&dir);
