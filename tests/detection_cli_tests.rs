@@ -71,6 +71,20 @@ fn explicit_multiple_langs() {
 }
 
 #[test]
+fn explicit_duplicate_langs_are_deduped() {
+    let plan = plan_language_resolution(
+        &[LanguageChoice::Go, LanguageChoice::Go, LanguageChoice::JavaScript],
+        DetectionOutcome::NoMatch,
+        &[],
+    );
+
+    assert_eq!(
+        plan,
+        ResolutionPlan::Explicit(vec![LanguageChoice::Go, LanguageChoice::JavaScript])
+    );
+}
+
+#[test]
 fn detection_acceptance_uses_detected_languages() {
     let candidate = rust_candidate();
     let outcome = DetectionOutcome::Matches {

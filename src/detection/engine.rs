@@ -1,7 +1,7 @@
 use std::{io, path::Path};
 
 use super::detectors::run_detectors;
-use super::types::DetectionOutcome;
+use super::types::{DetectionOutcome, LanguageCandidate};
 use crate::schema::Language;
 
 pub fn detect_project(target_dir: &Path) -> io::Result<DetectionOutcome> {
@@ -14,7 +14,7 @@ pub fn detect_project(target_dir: &Path) -> io::Result<DetectionOutcome> {
     }
 }
 
-fn priority_key(candidate: &super::types::LanguageCandidate) -> usize {
+fn priority_key(candidate: &LanguageCandidate) -> usize {
     match candidate.language {
         Language::Rust { .. } => 0,
         Language::Python { .. } => 1,

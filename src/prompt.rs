@@ -32,23 +32,30 @@ pub fn prompt_ignore_mode() -> IgnoreMode {
 
 pub fn prompt_language_choices() -> Vec<LanguageChoice> {
     let options = vec!["Rust", "Python", "Go", "Java", "JavaScript"];
-    let selections = MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select language(s)")
-        .items(&options)
-        .interact()
-        .expect("select err");
+    loop {
+        let selections = MultiSelect::with_theme(&ColorfulTheme::default())
+            .with_prompt("Select language(s)")
+            .items(&options)
+            .interact()
+            .expect("select err");
 
-    selections
-        .iter()
-        .map(|&i| match i {
-            0 => LanguageChoice::Rust,
-            1 => LanguageChoice::Python,
-            2 => LanguageChoice::Go,
-            3 => LanguageChoice::Java,
-            4 => LanguageChoice::JavaScript,
-            _ => unreachable!(),
-        })
-        .collect()
+        if selections.is_empty() {
+            println!("please select at least one language");
+            continue;
+        }
+
+        return selections
+            .iter()
+            .map(|&i| match i {
+                0 => LanguageChoice::Rust,
+                1 => LanguageChoice::Python,
+                2 => LanguageChoice::Go,
+                3 => LanguageChoice::Java,
+                4 => LanguageChoice::JavaScript,
+                _ => unreachable!(),
+            })
+            .collect();
+    }
 }
 
 pub fn prompt_language_config(choice: LanguageChoice) -> Language {

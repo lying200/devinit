@@ -17,7 +17,10 @@ pub fn plan_language_resolution(
     confirmed_indices: &[usize],
 ) -> ResolutionPlan {
     if !cli_langs.is_empty() {
-        return ResolutionPlan::Explicit(cli_langs.to_vec());
+        let mut deduped = cli_langs.to_vec();
+        deduped.sort();
+        deduped.dedup();
+        return ResolutionPlan::Explicit(deduped);
     }
 
     match detection {
