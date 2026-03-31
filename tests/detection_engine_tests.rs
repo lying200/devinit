@@ -68,7 +68,7 @@ fn detect_project_returns_rust_match_for_cargo_project() {
 
     match outcome {
         DetectionOutcome::Matches { candidates } => {
-            assert!(candidates.len() >= 1);
+            assert!(!candidates.is_empty());
             assert!(matches!(candidates[0].language, Language::Rust { .. }));
         }
         DetectionOutcome::NoMatch => panic!("expected matches"),

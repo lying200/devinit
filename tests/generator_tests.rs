@@ -53,7 +53,7 @@ fn test_render_rust_base() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -70,7 +70,7 @@ fn test_render_rust_with_channel() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n    channel = \"stable\";\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -87,7 +87,7 @@ fn test_render_rust_with_version() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n    version = \"1.81.0\";\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -104,7 +104,7 @@ fn test_render_rust_with_components() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n    components = [\n      \"clippy\"\n    ];\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -121,7 +121,7 @@ fn test_render_rust_with_targets() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n  ];\n\n  languages.rust = {\n    enable = true;\n    targets = [\n      \"wasm32-unknown-unknown\"\n    ];\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -138,7 +138,7 @@ fn test_render_devenv_yaml() {
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
     let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  rust-overlay:\n    url: github:oxalica/rust-overlay\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -156,7 +156,7 @@ fn test_render_python_base() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -174,7 +174,7 @@ fn test_render_python_with_version() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n    version = \"3.11\";\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -192,7 +192,7 @@ fn test_render_python_with_package() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n    package = pkgs.python311;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -210,7 +210,7 @@ fn test_render_python_with_uv() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n    uv.enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -228,7 +228,7 @@ fn test_render_python_with_venv() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.python = {\n    enable = true;\n    venv.enable = true;\n    venv.quiet = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -246,7 +246,7 @@ fn test_render_devenv_yaml_for_python_with_version() {
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
     let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  nixpkgs-python:\n    url: github:cachix/nixpkgs-python\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -264,7 +264,7 @@ fn test_render_devenv_yaml_for_python_with_package_only() {
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
     let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -279,7 +279,7 @@ fn test_render_go_base() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.go = {\n    enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -294,7 +294,7 @@ fn test_render_go_with_version() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.go = {\n    enable = true;\n    version = \"1.22.0\";\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -309,7 +309,7 @@ fn test_render_go_with_package() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.go = {\n    enable = true;\n    package = pkgs.go_1_24;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -323,8 +323,8 @@ fn test_render_devenv_yaml_for_go_with_version() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
-    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  go-overlay:\n    url: github:nix-community/go-overlay\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
-    assert_eq!(expected, devenv_conf)
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  go-overlay:\n    url: github:purpleclay/go-overlay\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -339,7 +339,7 @@ fn test_render_devenv_yaml_for_go_with_package_only() {
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
     let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -355,7 +355,7 @@ fn test_render_java_base() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.java = {\n    enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -371,7 +371,7 @@ fn test_render_java_with_jdk_package() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.java = {\n    enable = true;\n    jdk.package = pkgs.jdk17;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -387,7 +387,7 @@ fn test_render_java_with_gradle() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.java = {\n    enable = true;\n    gradle.enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -403,7 +403,7 @@ fn test_render_java_with_maven() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.java = {\n    enable = true;\n    maven.enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -419,7 +419,7 @@ fn test_render_devenv_yaml_for_java() {
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
     let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -435,7 +435,7 @@ fn test_render_javascript_base() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -451,7 +451,7 @@ fn test_render_javascript_with_package() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    package = pkgs.nodejs_22;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -467,7 +467,7 @@ fn test_render_javascript_with_npm() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    npm.enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -483,7 +483,7 @@ fn test_render_javascript_with_pnpm() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    pnpm.enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -499,7 +499,7 @@ fn test_render_javascript_with_yarn() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    yarn.enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -515,7 +515,7 @@ fn test_render_javascript_with_corepack() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    corepack.enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -531,7 +531,7 @@ fn test_render_javascript_with_bun() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.javascript = {\n    enable = true;\n    bun.enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -547,7 +547,7 @@ fn test_render_devenv_yaml_for_javascript() {
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
     let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 // Multi-language tests
@@ -571,7 +571,7 @@ fn test_render_multi_language_go_and_javascript() {
     };
     let devenv_conf = render_devenv_nix(&project_ctx);
     let expected = "{ pkgs, ... }:\n\n{\n  packages = [\n    pkgs.git\n  ];\n\n  languages.go = {\n    enable = true;\n    version = \"1.22.0\";\n  };\n\n  languages.javascript = {\n    enable = true;\n    pnpm.enable = true;\n  };\n}\n";
-    assert_eq!(expected, devenv_conf)
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -592,8 +592,8 @@ fn test_render_devenv_yaml_multi_language_go_version_and_javascript() {
         tools: vec![],
     };
     let devenv_conf = render_devenv_yaml(&project_ctx);
-    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  go-overlay:\n    url: github:nix-community/go-overlay\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
-    assert_eq!(expected, devenv_conf)
+    let expected = "inputs:\n  nixpkgs:\n    url: github:cachix/devenv-nixpkgs/rolling\n\n  go-overlay:\n    url: github:purpleclay/go-overlay\n    inputs:\n      nixpkgs:\n        follows: nixpkgs\n";
+    assert_eq!(expected, devenv_conf);
 }
 
 #[test]
@@ -651,6 +651,6 @@ fn test_render_devenv_yaml_multi_language_rust_and_python_with_version() {
 #[test]
 fn test_render_envrc() {
     let envrc = render_envrc();
-    let expected = "#!/usr/bin/env bash\n\neval \"$(devenv direnvrc)\"\n\n# You can pass flags to the devenv command\n# For example: use devenv --impure --option services.postgres.enable:bool true\nuse devenv\n";
-    assert_eq!(expected, envrc)
+    let expected = "# devinit: start\neval \"$(devenv direnvrc)\"\n\n# You can pass flags to the devenv command\n# For example: use devenv --impure --option services.postgres.enable:bool true\nuse devenv\n# devinit: end\n";
+    assert_eq!(expected, envrc);
 }
