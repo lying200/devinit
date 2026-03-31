@@ -3,7 +3,12 @@ use std::path::PathBuf;
 use clap::{Parser, ValueEnum};
 
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(
+    author,
+    version,
+    about = "Initialize devenv development environment for your project",
+    long_about = "Automatically detect project languages and generate devenv.nix, devenv.yaml, and .envrc configuration files."
+)]
 pub struct Cli {
     #[arg(short, long)]
     pub lang: Vec<LanguageChoice>,
