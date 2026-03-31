@@ -1,9 +1,6 @@
 use devinit::generator::{render_devenv_nix, render_devenv_yaml, render_envrc};
 use devinit::schema::{Language, ProjectContext};
 
-fn nomalize_whitespace(s: &str) -> String {
-    s.split_whitespace().collect::<Vec<&str>>().join(" ")
-}
 
 #[test]
 fn test_render_rust_base_without_tools_has_no_git_package() {
@@ -654,14 +651,6 @@ fn test_render_devenv_yaml_multi_language_rust_and_python_with_version() {
 #[test]
 fn test_render_envrc() {
     let envrc = render_envrc();
-    let expected = r#"
-        #!/usr/bin/env bash
-
-        eval "$(devenv direnvrc)"
-
-        # You can pass flags to the devenv command
-        # For example: use devenv --impure --option services.postgres.enable:bool true
-        use devenv
-        "#;
-    assert_eq!(nomalize_whitespace(expected), nomalize_whitespace(&envrc))
+    let expected = "#!/usr/bin/env bash\n\neval \"$(devenv direnvrc)\"\n\n# You can pass flags to the devenv command\n# For example: use devenv --impure --option services.postgres.enable:bool true\nuse devenv\n";
+    assert_eq!(expected, envrc)
 }
