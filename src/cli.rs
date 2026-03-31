@@ -17,6 +17,10 @@ pub struct Cli {
     #[arg(short, long)]
     pub yes: bool,
 
+    /// Overwrite existing devenv/direnv/nix configuration
+    #[arg(short, long)]
+    pub force: bool,
+
     #[arg(default_value = ".")]
     pub path: PathBuf,
 }
