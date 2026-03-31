@@ -9,13 +9,15 @@
 - [x] 5 种语言支持：Rust、Python、Go、Java、JavaScript
 - [x] 项目自动检测（语言识别 + 版本推断）
 - [x] 单项目多语言支持（如 Go + JavaScript）
-- [x] 基础 CLI 工作流
+- [x] 检测结果可局部修改（保留正确的，修改错误的）
 - [x] 非交互式模式（`--yes` 跳过提示，适用于 CI/CD）
+- [x] `--force` 覆盖已有配置
 - [x] 已有 `devenv` / `direnv` / Nix 环境保护
 - [x] Git ignore 处理
   - [x] 支持 `.gitignore`
   - [x] 支持 `.git/info/exclude`
   - [x] 支持父级 Git 仓库检测
+- [x] 统一错误处理（`run() -> Result` 模式）
 
 ## 用法
 
@@ -25,10 +27,16 @@ devinit
 
 # 指定语言
 devinit --lang go
-devinit --lang go --lang javascript
+devinit --lang go,javascript
 
 # 非交互式（自动检测 + 默认配置，适用于 CI/CD）
 devinit --yes
+
+# 非交互式 + 指定语言
+devinit --yes --lang go,javascript
+
+# 覆盖已有配置
+devinit --force
 
 # 指定目录
 devinit /path/to/project
@@ -42,7 +50,5 @@ devinit /path/to/project
 
 ## TODO
 
-- [ ] 更完整的异常处理
-- [ ] 更好的交互体验
 - [ ] Services 集成（PostgreSQL、Redis 等）
 - [ ] 更丰富的项目模板
