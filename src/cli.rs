@@ -10,7 +10,7 @@ use clap::{Parser, ValueEnum};
     long_about = "Automatically detect project languages and generate devenv.nix, devenv.yaml, and .envrc configuration files."
 )]
 pub struct Cli {
-    #[arg(short, long)]
+    #[arg(short, long, value_delimiter = ',')]
     pub lang: Vec<LanguageChoice>,
 
     /// Non-interactive mode: accept detected config and use defaults
