@@ -54,8 +54,8 @@ fn main() {
 
     let ctx = ProjectContext {
         languages,
-        services: vec![],
-        tools: vec![],
+        services: vec![], // TODO: services 检测/配置
+        tools: vec![],    // TODO: tools 检测/配置
     };
 
     let output_file = plan_files(&ctx);
