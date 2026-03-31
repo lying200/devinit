@@ -197,7 +197,7 @@ fn detected_primary_field(candidate: &LanguageCandidate) -> Option<String> {
     }
 }
 
-pub fn prompt_rust_config() -> Language {
+fn prompt_rust_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
         .with_prompt("Use default Rust config?")
@@ -285,7 +285,7 @@ pub fn prompt_rust_config() -> Language {
     }
 }
 
-pub fn prompt_python_config() -> Language {
+fn prompt_python_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
         .with_prompt("Use default Python config?")
@@ -360,7 +360,7 @@ pub fn prompt_python_config() -> Language {
     }
 }
 
-pub fn prompt_go_config() -> Language {
+fn prompt_go_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
         .with_prompt("Use default Go config?")
@@ -399,7 +399,7 @@ pub fn prompt_go_config() -> Language {
     Language::Go { version, package }
 }
 
-pub fn prompt_java_config() -> Language {
+fn prompt_java_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
         .with_prompt("Use default Java config?")
@@ -448,7 +448,7 @@ pub fn prompt_java_config() -> Language {
     }
 }
 
-pub fn prompt_javascript_config() -> Language {
+fn prompt_javascript_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
         .with_prompt("Use default JavaScript config?")
