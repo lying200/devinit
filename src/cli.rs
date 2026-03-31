@@ -36,6 +36,7 @@ pub enum LanguageChoice {
 }
 
 impl LanguageChoice {
+    #[must_use]
     pub fn to_default_language(self) -> crate::schema::Language {
         use crate::schema::Language;
         match self {

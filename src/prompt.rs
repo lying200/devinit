@@ -5,6 +5,7 @@ use crate::detection::LanguageCandidate;
 use crate::git_ignore::IgnoreMode;
 use crate::schema::Language;
 
+#[must_use]
 pub fn ignore_mode_from_selection(selection: usize) -> IgnoreMode {
     match selection {
         0 => IgnoreMode::None,
@@ -14,6 +15,12 @@ pub fn ignore_mode_from_selection(selection: usize) -> IgnoreMode {
     }
 }
 
+/// Prompts the user to select a git ignore mode.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
 pub fn prompt_ignore_mode() -> IgnoreMode {
     let options = vec![
         "Do nothing",
@@ -30,6 +37,12 @@ pub fn prompt_ignore_mode() -> IgnoreMode {
     ignore_mode_from_selection(selection)
 }
 
+/// Prompts the user to select one or more languages.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
 pub fn prompt_language_choices() -> Vec<LanguageChoice> {
     let options = vec!["Rust", "Python", "Go", "Java", "JavaScript"];
     loop {
@@ -58,6 +71,7 @@ pub fn prompt_language_choices() -> Vec<LanguageChoice> {
     }
 }
 
+#[must_use]
 pub fn prompt_language_config(choice: LanguageChoice) -> Language {
     match choice {
         LanguageChoice::Rust => prompt_rust_config(),
@@ -68,6 +82,7 @@ pub fn prompt_language_config(choice: LanguageChoice) -> Language {
     }
 }
 
+#[must_use]
 pub fn format_detected_summary(candidate: &LanguageCandidate) -> String {
     let mut lines = vec![format!(
         "detected language: {}",
@@ -85,6 +100,12 @@ pub fn format_detected_summary(candidate: &LanguageCandidate) -> String {
     lines.join("\n")
 }
 
+/// Displays detected languages and prompts the user to confirm selections.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
 pub fn confirm_detected_configs(candidates: &[LanguageCandidate]) -> Vec<usize> {
     println!("\nProject analysis:");
     for candidate in candidates {
@@ -123,6 +144,12 @@ pub fn confirm_detected_configs(candidates: &[LanguageCandidate]) -> Vec<usize> 
         .expect("interact err")
 }
 
+/// Prompts the user to optionally modify each detected language config.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
 pub fn prompt_modify_detected(languages: Vec<Language>) -> Vec<Language> {
     let theme = ColorfulTheme::default();
     languages
@@ -172,12 +199,12 @@ fn detected_primary_field(candidate: &LanguageCandidate) -> Option<String> {
         Language::Rust {
             version: Some(version),
             ..
-        } => Some(format!("detected version: {version}")),
-        Language::Python {
+        }
+        | Language::Python {
             version: Some(version),
             ..
-        } => Some(format!("detected version: {version}")),
-        Language::Go {
+        }
+        | Language::Go {
             version: Some(version),
             ..
         } => Some(format!("detected version: {version}")),

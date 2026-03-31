@@ -4,6 +4,11 @@ use super::detectors::run_detectors;
 use super::types::{DetectionOutcome, LanguageCandidate};
 use crate::schema::Language;
 
+/// Detects project languages by running all registered detectors.
+///
+/// # Errors
+///
+/// Returns any I/O error produced by an individual detector.
 pub fn detect_project(target_dir: &Path) -> io::Result<DetectionOutcome> {
     let mut candidates = run_detectors(target_dir)?;
     if candidates.is_empty() {

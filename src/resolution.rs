@@ -11,6 +11,7 @@ pub enum ResolutionPlan {
     PromptManual,
 }
 
+#[must_use]
 pub fn plan_language_resolution(
     cli_langs: &[LanguageChoice],
     detection: DetectionOutcome,

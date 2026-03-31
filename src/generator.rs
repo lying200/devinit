@@ -12,6 +12,7 @@ pub struct OutputFile {
     pub content: String,
 }
 
+#[must_use]
 pub fn plan_files(ctx: &ProjectContext) -> Vec<OutputFile> {
     vec![
         OutputFile {
@@ -29,6 +30,11 @@ pub fn plan_files(ctx: &ProjectContext) -> Vec<OutputFile> {
     ]
 }
 
+/// Writes generated files to the target directory.
+///
+/// # Errors
+///
+/// Returns any I/O error from creating directories or writing files.
 pub fn write_files(target_dir: &Path, files: &[OutputFile]) -> Result<(), std::io::Error> {
     if !target_dir.exists() {
         std::fs::create_dir_all(target_dir)?;

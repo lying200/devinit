@@ -33,14 +33,14 @@ fn run() -> io::Result<()> {
         ));
     }
 
-    if !cli.force {
-        if let Some(found) = detect_existing_environment(target_dir)? {
-            println!(
-                "existing direnv/devenv/nix environment detected ({found}), skipping initialization"
-            );
-            println!("use --force to overwrite");
-            return Ok(());
-        }
+    if !cli.force
+        && let Some(found) = detect_existing_environment(target_dir)?
+    {
+        println!(
+            "existing direnv/devenv/nix environment detected ({found}), skipping initialization"
+        );
+        println!("use --force to overwrite");
+        return Ok(());
     }
 
     let languages = resolve_languages_config(target_dir, &cli.lang, cli.yes)?;
