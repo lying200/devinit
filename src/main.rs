@@ -62,8 +62,12 @@ fn run() -> io::Result<()> {
         handle_git_ignore(target_dir)?;
     }
 
-    println!("devenv init success!");
-    println!("use \"direnv allow\" to activate the environment.");
+    println!("\nGenerated files:");
+    for file in &output_files {
+        println!("  {}", file.filename);
+    }
+    println!("\ndevenv init success!");
+    println!("Run \"direnv allow\" to activate the environment.");
     Ok(())
 }
 

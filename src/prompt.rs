@@ -86,6 +86,21 @@ pub fn format_detected_summary(candidate: &LanguageCandidate) -> String {
 }
 
 pub fn confirm_detected_configs(candidates: &[LanguageCandidate]) -> Vec<usize> {
+    println!("\nProject analysis:");
+    for candidate in candidates {
+        let name = detected_language_name(&candidate.language);
+        let detail = detected_primary_field(candidate);
+        if let Some(d) = &detail {
+            println!("  {name} - {d}");
+        } else {
+            println!("  {name}");
+        }
+        for reason in &candidate.reasons {
+            println!("    - {reason}");
+        }
+    }
+    println!();
+
     let labels: Vec<String> = candidates
         .iter()
         .map(|c| {
@@ -101,7 +116,7 @@ pub fn confirm_detected_configs(candidates: &[LanguageCandidate]) -> Vec<usize> 
     let defaults: Vec<bool> = vec![true; candidates.len()];
 
     MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Detected languages - select which to use")
+        .with_prompt("Use detected languages?")
         .items(&labels)
         .defaults(&defaults)
         .interact()
@@ -155,7 +170,7 @@ fn detected_primary_field(candidate: &LanguageCandidate) -> Option<String> {
 pub fn prompt_rust_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
-        .with_prompt("use default rust config?")
+        .with_prompt("Use default Rust config?")
         .default(true)
         .interact()
         .expect("interact err exit");
@@ -243,7 +258,7 @@ pub fn prompt_rust_config() -> Language {
 pub fn prompt_python_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
-        .with_prompt("use default python config?")
+        .with_prompt("Use default Python config?")
         .default(true)
         .interact()
         .expect("interact err exit");
@@ -318,7 +333,7 @@ pub fn prompt_python_config() -> Language {
 pub fn prompt_go_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
-        .with_prompt("use default go config?")
+        .with_prompt("Use default Go config?")
         .default(true)
         .interact()
         .expect("interact err exit");
@@ -357,7 +372,7 @@ pub fn prompt_go_config() -> Language {
 pub fn prompt_java_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
-        .with_prompt("use default java config?")
+        .with_prompt("Use default Java config?")
         .default(true)
         .interact()
         .expect("interact err exit");
@@ -406,7 +421,7 @@ pub fn prompt_java_config() -> Language {
 pub fn prompt_javascript_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
-        .with_prompt("use default javascript config?")
+        .with_prompt("Use default JavaScript config?")
         .default(true)
         .interact()
         .expect("interact err exit");
