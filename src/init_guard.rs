@@ -4,7 +4,6 @@ const DIRECT_MARKERS: &[&str] = &[
     "devenv.nix",
     "devenv.yaml",
     "devenv.lock",
-    ".envrc",
     "shell.nix",
     "default.nix",
     "flake.nix",

@@ -36,7 +36,32 @@ pub fn write_files(target_dir: &Path, files: &[OutputFile]) -> Result<(), std::i
 
     for file in files {
         let path = target_dir.join(&file.filename);
-        std::fs::write(&path, &file.content)?;
+        if file.filename == ".envrc" {
+            write_envrc(&path, &file.content)?;
+        } else {
+            std::fs::write(&path, &file.content)?;
+        }
+    }
+    Ok(())
+}
+
+/// .envrc 使用追加模式：如果文件已存在且包含 devenv 配置则跳过，
+/// 已存在但无 devenv 配置则追加，不存在则创建。
+fn write_envrc(path: &Path, content: &str) -> Result<(), std::io::Error> {
+    if path.exists() {
+        let existing = std::fs::read_to_string(path)?;
+        if existing.contains("use devenv") {
+            return Ok(());
+        }
+        let mut combined = existing;
+        if !combined.ends_with('\n') {
+            combined.push('\n');
+        }
+        combined.push('\n');
+        combined.push_str(content);
+        std::fs::write(path, combined)?;
+    } else {
+        std::fs::write(path, content)?;
     }
     Ok(())
 }

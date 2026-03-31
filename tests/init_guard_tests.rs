@@ -34,14 +34,14 @@ fn detect_existing_environment_finds_devenv_nix() {
 }
 
 #[test]
-fn detect_existing_environment_finds_envrc() {
-    let dir = unique_test_dir("envrc");
+fn detect_existing_environment_ignores_envrc_alone() {
+    let dir = unique_test_dir("envrc-only");
     create_dir(&dir);
     fs::write(dir.join(".envrc"), "use nix").unwrap();
 
     let found = detect_existing_environment(&dir).unwrap();
 
-    assert_eq!(found.as_deref(), Some(".envrc"));
+    assert_eq!(found, None);
 }
 
 #[test]
