@@ -30,11 +30,22 @@ fn parse_go_version(content: &str) -> Option<String> {
     for line in content.lines() {
         let trimmed = line.trim();
         if let Some(version) = trimmed.strip_prefix("go ") {
-            let version = version.trim().to_string();
+            let version = version.trim();
             if !version.is_empty() {
-                return Some(version);
+                return Some(normalize_go_version(version));
             }
         }
     }
     None
+}
+
+/// go.mod 中的版本可能只有 major.minor（如 `1.22`），
+/// devenv 需要完整的 major.minor.patch 格式（如 `1.22.0`）。
+fn normalize_go_version(version: &str) -> String {
+    let dot_count = version.chars().filter(|&c| c == '.').count();
+    if dot_count == 1 {
+        format!("{version}.0")
+    } else {
+        version.to_string()
+    }
 }

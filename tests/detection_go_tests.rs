@@ -53,12 +53,12 @@ fn go_detector_detects_go_from_go_mod() {
 }
 
 #[test]
-fn go_detector_reads_version_from_go_mod_go_directive() {
-    let dir = unique_test_dir("go-version");
+fn go_detector_normalizes_two_segment_version_to_three() {
+    let dir = unique_test_dir("go-version-two-seg");
     create_dir(&dir);
     fs::write(
         dir.join("go.mod"),
-        "module example.com/demo\n\ngo 1.24.0\n",
+        "module example.com/demo\n\ngo 1.24\n",
     )
     .unwrap();
 
@@ -69,6 +69,31 @@ fn go_detector_reads_version_from_go_mod_go_directive() {
         Some(LanguageCandidate {
             language: Language::Go {
                 version: Some("1.24.0".to_string()),
+                package: None,
+            },
+            confidence: DetectionConfidence::High,
+            reasons: vec!["found go.mod".to_string(), "found go version".to_string()],
+        })
+    );
+}
+
+#[test]
+fn go_detector_keeps_three_segment_version_as_is() {
+    let dir = unique_test_dir("go-version-three-seg");
+    create_dir(&dir);
+    fs::write(
+        dir.join("go.mod"),
+        "module example.com/demo\n\ngo 1.22.5\n",
+    )
+    .unwrap();
+
+    let result = detect(&dir).unwrap();
+
+    assert_eq!(
+        result,
+        Some(LanguageCandidate {
+            language: Language::Go {
+                version: Some("1.22.5".to_string()),
                 package: None,
             },
             confidence: DetectionConfidence::High,
