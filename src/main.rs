@@ -1,3 +1,5 @@
+use std::io;
+
 use clap::Parser;
 use devinit::{
     cli::{Cli, LanguageChoice},
@@ -14,42 +16,37 @@ use devinit::{
 };
 
 fn main() {
+    if let Err(e) = run() {
+        eprintln!("error: {e}");
+        std::process::exit(1);
+    }
+}
+
+fn run() -> io::Result<()> {
     let cli = Cli::parse();
-    let target_dir = cli.path;
+    let target_dir = &cli.path;
 
     if !target_dir.exists() {
-        eprint!(
-            "init target does not exist: {path}",
-            path = target_dir.display()
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("init target does not exist: {}", target_dir.display()),
+        ));
+    }
+
+    if let Some(found) = detect_existing_environment(target_dir)? {
+        println!(
+            "existing direnv/devenv/nix environment detected ({found}), skipping devinit initialization"
         );
-        std::process::exit(1);
+        return Ok(());
     }
 
-    match detect_existing_environment(&target_dir) {
-        Ok(Some(found)) => {
-            println!(
-                "existing direnv/devenv/nix environment detected ({found}), skipping devinit initialization"
-            );
-            return;
-        }
-        Ok(None) => {}
-        Err(e) => {
-            eprint!("inspect init target err: {e}");
-            std::process::exit(1);
-        }
-    }
-
-    let languages = match resolve_languages_config(&target_dir, &cli.lang, cli.yes) {
-        Ok(languages) => languages,
-        Err(e) => {
-            eprint!("resolve language config err: {e}");
-            std::process::exit(1);
-        }
-    };
+    let languages = resolve_languages_config(target_dir, &cli.lang, cli.yes)?;
 
     if languages.is_empty() {
-        eprintln!("no languages selected, nothing to generate");
-        std::process::exit(1);
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "no languages selected, nothing to generate",
+        ));
     }
 
     let ctx = ProjectContext {
@@ -58,49 +55,41 @@ fn main() {
         tools: vec![],    // TODO: tools 检测/配置
     };
 
-    let output_file = plan_files(&ctx);
-    if let Err(e) = write_files(&target_dir, &output_file) {
-        eprint!("generate devenv file err: {e}");
-        std::process::exit(1);
-    }
+    let output_files = plan_files(&ctx);
+    write_files(target_dir, &output_files)?;
 
-    if cli.yes {
-        println!("devenv init success!");
-        println!("use \"direnv allow\" to activate the environment.");
-        return;
-    }
-
-    if find_git_repo_root(&target_dir).is_none() {
-        println!("git not initialized, skipping ignore handling");
-    } else {
-        let ignore_mode = prompt_ignore_mode();
-        match apply_ignore_mode(&target_dir, ignore_mode) {
-            Ok(outcome) => {
-                if !outcome.tracked_files.is_empty() {
-                    println!(
-                        "ignored patterns were added, but tracked files remain tracked by git"
-                    );
-                    for path in outcome.tracked_files {
-                        println!("- {path}");
-                    }
-                }
-            }
-            Err(e) => {
-                eprint!("apply git ignore err: {e}");
-                std::process::exit(1);
-            }
-        }
+    if !cli.yes {
+        handle_git_ignore(target_dir)?;
     }
 
     println!("devenv init success!");
-    println!("use \"direnv allow\" to activate the environment.")
+    println!("use \"direnv allow\" to activate the environment.");
+    Ok(())
+}
+
+fn handle_git_ignore(target_dir: &std::path::Path) -> io::Result<()> {
+    if find_git_repo_root(target_dir).is_none() {
+        println!("git not initialized, skipping ignore handling");
+        return Ok(());
+    }
+
+    let ignore_mode = prompt_ignore_mode();
+    let outcome = apply_ignore_mode(target_dir, ignore_mode)?;
+
+    if !outcome.tracked_files.is_empty() {
+        println!("ignored patterns were added, but tracked files remain tracked by git");
+        for path in outcome.tracked_files {
+            println!("- {path}");
+        }
+    }
+    Ok(())
 }
 
 fn resolve_languages_config(
     target_dir: &std::path::Path,
     cli_langs: &[LanguageChoice],
     non_interactive: bool,
-) -> std::io::Result<Vec<Language>> {
+) -> io::Result<Vec<Language>> {
     // --lang provided: use explicit languages
     if !cli_langs.is_empty() {
         if non_interactive {
@@ -114,15 +103,15 @@ fn resolve_languages_config(
 
     // --yes: accept all detected languages with default config
     if non_interactive {
-        return Ok(match detection {
+        return match detection {
             DetectionOutcome::Matches { candidates } => {
-                candidates.into_iter().map(|c| c.language).collect()
+                Ok(candidates.into_iter().map(|c| c.language).collect())
             }
-            DetectionOutcome::NoMatch => {
-                eprintln!("no languages detected and --yes specified, cannot proceed without --lang");
-                std::process::exit(1);
-            }
-        });
+            DetectionOutcome::NoMatch => Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "no languages detected and --yes specified, use --lang to specify languages",
+            )),
+        };
     }
 
     // Interactive flow
