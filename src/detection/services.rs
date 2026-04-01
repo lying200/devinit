@@ -53,6 +53,9 @@ fn find_compose_file(dir: &Path) -> Option<PathBuf> {
 fn parse_compose_services(content: &str, source: &str, candidates: &mut Vec<ServiceCandidate>) {
     for line in content.lines() {
         let trimmed = line.trim();
+        if trimmed.starts_with('#') {
+            continue;
+        }
         let Some(image) = trimmed
             .strip_prefix("image:")
             .or_else(|| trimmed.strip_prefix("image :"))

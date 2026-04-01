@@ -234,3 +234,18 @@ fn detect_services_all_three_services() {
     assert!(candidates.iter().any(|c| matches!(c.service, Service::Redis)));
     assert!(candidates.iter().any(|c| matches!(c.service, Service::Mysql { .. })));
 }
+
+#[test]
+fn detect_services_ignores_commented_lines() {
+    let dir = unique_test_dir("commented");
+    create_dir(&dir);
+    fs::write(
+        dir.join("docker-compose.yml"),
+        "services:\n  db:\n    # image: postgres:16\n    image: redis:7\n",
+    )
+    .unwrap();
+
+    let candidates = detect_services(&dir).unwrap();
+    assert_eq!(candidates.len(), 1);
+    assert!(matches!(candidates[0].service, Service::Redis));
+}

@@ -64,6 +64,9 @@ fn detect_toolchain(
 fn parse_channel_assignment(content: &str) -> Option<String> {
     for line in content.lines() {
         let trimmed = line.trim();
+        if trimmed.starts_with('#') {
+            continue;
+        }
         if let Some(value) = trimmed.strip_prefix("channel =") {
             return Some(value.trim().trim_matches('"').to_string());
         }

@@ -34,6 +34,9 @@ pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
 fn parse_go_version(content: &str) -> Option<String> {
     for line in content.lines() {
         let trimmed = line.trim();
+        if trimmed.starts_with("//") {
+            continue;
+        }
         if let Some(version) = trimmed.strip_prefix("go ") {
             let version = version.trim();
             if !version.is_empty() {

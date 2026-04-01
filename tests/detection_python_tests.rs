@@ -316,3 +316,41 @@ fn python_detector_dot_python_version_takes_precedence() {
         })
     );
 }
+
+#[test]
+fn python_detector_ignores_commented_requires_python() {
+    let dir = unique_test_dir("commented-requires");
+    create_dir(&dir);
+    fs::write(
+        dir.join("pyproject.toml"),
+        "[project]\nname = \"demo\"\n# requires-python = \">=3.11\"\n",
+    )
+    .unwrap();
+
+    let result = detect(&dir).unwrap().unwrap();
+    match result.language {
+        Language::Python { version, .. } => {
+            assert!(version.is_none(), "commented requires-python should be ignored");
+        }
+        _ => panic!("expected Python"),
+    }
+}
+
+#[test]
+fn python_detector_not_confused_by_similar_key_prefix() {
+    let dir = unique_test_dir("similar-prefix");
+    create_dir(&dir);
+    fs::write(
+        dir.join("pyproject.toml"),
+        "[project]\nname = \"demo\"\nrequires-python-extra = \"foo\"\nrequires-python = \">=3.12\"\n",
+    )
+    .unwrap();
+
+    let result = detect(&dir).unwrap().unwrap();
+    match result.language {
+        Language::Python { version, .. } => {
+            assert_eq!(version, Some("3.12".to_string()));
+        }
+        _ => panic!("expected Python"),
+    }
+}

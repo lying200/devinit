@@ -68,9 +68,15 @@ pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
 fn parse_requires_python(content: &str) -> Option<String> {
     for line in content.lines() {
         let trimmed = line.trim();
-        if let Some(value) = trimmed.strip_prefix("requires-python") {
-            let value = value.trim();
-            let value = value.strip_prefix('=')?;
+        if trimmed.starts_with('#') {
+            continue;
+        }
+        if let Some(remainder) = trimmed.strip_prefix("requires-python") {
+            let remainder = remainder.trim();
+            // Must be followed by '=' to be the actual key (not requires-python-foo)
+            let Some(value) = remainder.strip_prefix('=') else {
+                continue;
+            };
             let value = value.trim().trim_matches('"').trim_matches('\'');
 
             // 跳过复杂范围
@@ -78,7 +84,10 @@ fn parse_requires_python(content: &str) -> Option<String> {
                 return None;
             }
 
-            let version = value.strip_prefix(">=").or_else(|| value.strip_prefix("=="))?;
+            let Some(version) = value.strip_prefix(">=").or_else(|| value.strip_prefix("=="))
+            else {
+                continue;
+            };
             let version = version.trim();
 
             if is_version_like(version) {
