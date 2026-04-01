@@ -4,11 +4,8 @@ use serde::Serialize;
 #[derive(Debug, Clone, Serialize)]
 pub struct ProjectContext {
     pub languages: Vec<Language>,
-    // TODO: 尚未实现自动检测和交互式配置，当前始终为空
-    // 项目依赖服务，如 pg、redis 等
     pub services: Vec<Service>,
     // TODO: 尚未实现自动检测，当前始终为空
-    // 项目依赖工具，如 git 等
     pub tools: Vec<String>,
 }
 
@@ -62,8 +59,16 @@ pub enum Language {
     },
 }
 
-#[derive(Debug, Clone, Serialize)]
-pub struct Service {
-    pub name: String,
-    pub version: Option<String>,
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase", tag = "name")]
+pub enum Service {
+    Postgres {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package: Option<String>,
+    },
+    Redis,
+    Mysql {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package: Option<String>,
+    },
 }

@@ -1,5 +1,5 @@
 use devinit::generator::{render_devenv_nix, render_devenv_yaml, render_envrc};
-use devinit::schema::{Language, ProjectContext};
+use devinit::schema::{Language, ProjectContext, Service};
 
 
 #[test]
@@ -653,4 +653,116 @@ fn test_render_envrc() {
     let envrc = render_envrc();
     let expected = "# devinit: start\neval \"$(devenv direnvrc)\"\n\n# You can pass flags to the devenv command\n# For example: use devenv --impure --option services.postgres.enable:bool true\nuse devenv\n# devinit: end\n";
     assert_eq!(expected, envrc);
+}
+
+#[test]
+fn test_render_postgres_service() {
+    let project_ctx = ProjectContext {
+        languages: vec![],
+        services: vec![Service::Postgres { package: None }],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    assert!(devenv_conf.contains("services.postgres"));
+    assert!(devenv_conf.contains("enable = true;"));
+    assert!(devenv_conf.contains("listen_addresses = \"127.0.0.1\";"));
+}
+
+#[test]
+fn test_render_postgres_with_package() {
+    let project_ctx = ProjectContext {
+        languages: vec![],
+        services: vec![Service::Postgres {
+            package: Some("pkgs.postgresql_16".to_string()),
+        }],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    assert!(devenv_conf.contains("services.postgres"));
+    assert!(devenv_conf.contains("package = pkgs.postgresql_16;"));
+}
+
+#[test]
+fn test_render_redis_service() {
+    let project_ctx = ProjectContext {
+        languages: vec![],
+        services: vec![Service::Redis],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    assert!(devenv_conf.contains("services.redis.enable = true;"));
+}
+
+#[test]
+fn test_render_mysql_service() {
+    let project_ctx = ProjectContext {
+        languages: vec![],
+        services: vec![Service::Mysql { package: None }],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    assert!(devenv_conf.contains("services.mysql ="));
+    assert!(devenv_conf.contains("enable = true;"));
+    // Should NOT contain postgres
+    assert!(!devenv_conf.contains("services.postgres"));
+}
+
+#[test]
+fn test_render_mysql_with_package() {
+    let project_ctx = ProjectContext {
+        languages: vec![],
+        services: vec![Service::Mysql {
+            package: Some("pkgs.mysql80".to_string()),
+        }],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    assert!(devenv_conf.contains("services.mysql ="));
+    assert!(devenv_conf.contains("package = pkgs.mysql80;"));
+}
+
+#[test]
+fn test_render_multi_services() {
+    let project_ctx = ProjectContext {
+        languages: vec![],
+        services: vec![
+            Service::Postgres { package: None },
+            Service::Redis,
+        ],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    assert!(devenv_conf.contains("services.postgres"));
+    assert!(devenv_conf.contains("services.redis.enable = true;"));
+}
+
+#[test]
+fn test_render_no_services() {
+    let project_ctx = ProjectContext {
+        languages: vec![Language::Go {
+            version: None,
+            package: None,
+        }],
+        services: vec![],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    assert!(!devenv_conf.contains("services."));
+}
+
+#[test]
+fn test_render_language_and_service_together() {
+    let project_ctx = ProjectContext {
+        languages: vec![Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: None,
+        }],
+        services: vec![Service::Postgres { package: None }, Service::Redis],
+        tools: vec![],
+    };
+    let devenv_conf = render_devenv_nix(&project_ctx);
+    assert!(devenv_conf.contains("languages.java"));
+    assert!(devenv_conf.contains("services.postgres"));
+    assert!(devenv_conf.contains("services.redis.enable = true;"));
 }

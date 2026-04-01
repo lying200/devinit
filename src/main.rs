@@ -2,17 +2,18 @@ use std::io;
 
 use clap::Parser;
 use devinit::{
-    cli::{Cli, LanguageChoice},
-    detection::{DetectionOutcome, detect_project},
+    cli::{Cli, LanguageChoice, ServiceChoice},
+    detection::{DetectionOutcome, detect_project, detect_services},
     generator::{plan_files, write_files},
     git_ignore::{apply_ignore_mode, find_git_repo_root},
     init_guard::detect_existing_environment,
     prompt::{
-        confirm_detected_configs, prompt_ignore_mode, prompt_language_choices,
-        prompt_language_config, prompt_modify_detected,
+        confirm_detected_configs, confirm_detected_services, prompt_ignore_mode,
+        prompt_language_choices, prompt_language_config, prompt_modify_detected,
+        prompt_service_choices, prompt_service_config,
     },
     resolution::{ResolutionPlan, plan_language_resolution},
-    schema::{Language, ProjectContext},
+    schema::{Language, ProjectContext, Service},
 };
 
 fn main() {
@@ -52,10 +53,12 @@ fn run() -> io::Result<()> {
         ));
     }
 
+    let services = resolve_services_config(target_dir, &cli.service, cli.yes)?;
+
     let ctx = ProjectContext {
         languages,
-        services: vec![], // TODO: services 检测/配置
-        tools: vec![],    // TODO: tools 检测/配置
+        services,
+        tools: vec![], // TODO: tools 检测/配置
     };
 
     let output_files = plan_files(&ctx);
@@ -68,6 +71,18 @@ fn run() -> io::Result<()> {
     println!("\nGenerated files:");
     for file in &output_files {
         println!("  {}", file.filename);
+    }
+    if !ctx.services.is_empty() {
+        println!("\nServices enabled:");
+        for svc in &ctx.services {
+            let name = match svc {
+                Service::Postgres { .. } => "PostgreSQL",
+                Service::Redis => "Redis",
+                Service::Mysql { .. } => "MySQL",
+            };
+            println!("  {name}");
+        }
+        println!("Run \"devenv up\" to start services.");
     }
     println!("\ndevenv init success!");
     println!("Run \"direnv allow\" to activate the environment.");
@@ -97,12 +112,15 @@ fn resolve_languages_config(
     cli_langs: &[LanguageChoice],
     non_interactive: bool,
 ) -> io::Result<Vec<Language>> {
-    // --lang provided: use explicit languages
+    // --lang provided: use explicit languages (deduplicated)
     if !cli_langs.is_empty() {
+        let mut deduped = cli_langs.to_vec();
+        deduped.sort();
+        deduped.dedup();
         if non_interactive {
-            return Ok(cli_langs.iter().map(|c| c.to_default_language()).collect());
+            return Ok(deduped.iter().map(|c| c.to_default_language()).collect());
         }
-        return Ok(cli_langs.iter().map(|&c| prompt_language_config(c)).collect());
+        return Ok(deduped.iter().map(|&c| prompt_language_config(c)).collect());
     }
 
     // Run detection
@@ -145,3 +163,46 @@ fn resolve_languages_config(
     })
 }
 
+fn resolve_services_config(
+    target_dir: &std::path::Path,
+    cli_services: &[ServiceChoice],
+    non_interactive: bool,
+) -> io::Result<Vec<Service>> {
+    // --service provided: use explicit (deduplicated)
+    if !cli_services.is_empty() {
+        let mut deduped = cli_services.to_vec();
+        deduped.sort();
+        deduped.dedup();
+        if non_interactive {
+            return Ok(deduped.iter().map(|c| c.to_default_service()).collect());
+        }
+        return Ok(deduped.iter().map(|&c| prompt_service_config(c)).collect());
+    }
+
+    // Detect from docker-compose
+    let candidates = detect_services(target_dir)?;
+
+    if non_interactive {
+        // --yes: auto-accept detected services, skip if none
+        return Ok(candidates.into_iter().map(|c| c.service).collect());
+    }
+
+    // Interactive flow
+    if candidates.is_empty() {
+        // No compose file: prompt user to select
+        let choices = prompt_service_choices();
+        return Ok(choices
+            .iter()
+            .map(|&c| prompt_service_config(c))
+            .collect());
+    }
+
+    // Compose file found: confirm detected services
+    let confirmed = confirm_detected_services(&candidates);
+    let services: Vec<Service> = confirmed
+        .iter()
+        .filter_map(|&i| candidates.get(i).map(|c| c.service.clone()))
+        .collect();
+
+    Ok(services)
+}
