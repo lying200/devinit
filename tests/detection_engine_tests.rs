@@ -121,3 +121,122 @@ fn detect_project_sorts_candidates_by_priority() {
         DetectionOutcome::NoMatch => panic!("expected matches"),
     }
 }
+
+#[test]
+fn detect_project_finds_languages_in_subdirectories() {
+    let dir = unique_test_dir("monorepo-subdirs");
+    create_dir(&dir);
+    create_dir(&dir.join("backend"));
+    create_dir(&dir.join("tool"));
+    create_dir(&dir.join("ui"));
+    fs::write(dir.join("backend/pom.xml"), "<project></project>").unwrap();
+    fs::write(dir.join("tool/pyproject.toml"), "[project]\nname = \"tool\"\n").unwrap();
+    fs::write(dir.join("ui/package.json"), r#"{"name": "ui"}"#).unwrap();
+
+    let outcome = detect_project(&dir).unwrap();
+
+    match outcome {
+        DetectionOutcome::Matches { candidates } => {
+            assert_eq!(candidates.len(), 3);
+            assert!(candidates.iter().any(|c| matches!(c.language, Language::Java { .. })));
+            assert!(candidates.iter().any(|c| matches!(c.language, Language::Python { .. })));
+            assert!(candidates.iter().any(|c| matches!(c.language, Language::JavaScript { .. })));
+        }
+        DetectionOutcome::NoMatch => panic!("expected matches"),
+    }
+}
+
+#[test]
+fn detect_project_mixed_root_and_subdir() {
+    let dir = unique_test_dir("mixed-root-subdir");
+    create_dir(&dir);
+    create_dir(&dir.join("frontend"));
+    fs::write(dir.join("pyproject.toml"), "[project]\nname = \"app\"\n").unwrap();
+    fs::write(dir.join("frontend/package.json"), r#"{"name": "frontend"}"#).unwrap();
+
+    let outcome = detect_project(&dir).unwrap();
+
+    match outcome {
+        DetectionOutcome::Matches { candidates } => {
+            assert_eq!(candidates.len(), 2);
+            assert!(candidates.iter().any(|c| matches!(c.language, Language::Python { .. })));
+            assert!(candidates.iter().any(|c| matches!(c.language, Language::JavaScript { .. })));
+        }
+        DetectionOutcome::NoMatch => panic!("expected matches"),
+    }
+}
+
+#[test]
+fn detect_project_dedupes_same_language() {
+    let dir = unique_test_dir("workspace-dedup");
+    create_dir(&dir);
+    create_dir(&dir.join("crates/foo"));
+    fs::write(dir.join("Cargo.toml"), "[workspace]\nmembers = [\"crates/foo\"]\n").unwrap();
+    fs::write(dir.join("crates/foo/Cargo.toml"), "[package]\nname = \"foo\"\n").unwrap();
+
+    let outcome = detect_project(&dir).unwrap();
+
+    match outcome {
+        DetectionOutcome::Matches { candidates } => {
+            let rust_count = candidates
+                .iter()
+                .filter(|c| matches!(c.language, Language::Rust { .. }))
+                .count();
+            assert_eq!(rust_count, 1, "should dedupe to one Rust candidate");
+        }
+        DetectionOutcome::NoMatch => panic!("expected matches"),
+    }
+}
+
+#[test]
+fn detect_project_skips_noise_directories() {
+    let dir = unique_test_dir("noise-dirs");
+    create_dir(&dir);
+    create_dir(&dir.join("node_modules"));
+    create_dir(&dir.join("target"));
+    create_dir(&dir.join(".hidden"));
+    fs::write(dir.join("node_modules/package.json"), r#"{"name": "dep"}"#).unwrap();
+    fs::write(dir.join("target/Cargo.toml"), "[package]\nname = \"out\"\n").unwrap();
+    fs::write(dir.join(".hidden/pyproject.toml"), "[project]\nname = \"secret\"\n").unwrap();
+
+    let outcome = detect_project(&dir).unwrap();
+
+    assert_eq!(outcome, DetectionOutcome::NoMatch);
+}
+
+#[test]
+fn detect_project_keeps_higher_confidence_on_merge() {
+    let dir = unique_test_dir("confidence-merge");
+    create_dir(&dir);
+    create_dir(&dir.join("lib"));
+    // root: requirements.txt → Medium confidence
+    fs::write(dir.join("requirements.txt"), "requests\n").unwrap();
+    // subdir: pyproject.toml → High confidence
+    fs::write(dir.join("lib/pyproject.toml"), "[project]\nname = \"lib\"\n").unwrap();
+
+    let outcome = detect_project(&dir).unwrap();
+
+    match outcome {
+        DetectionOutcome::Matches { candidates } => {
+            let python_candidates: Vec<_> = candidates
+                .iter()
+                .filter(|c| matches!(c.language, Language::Python { .. }))
+                .collect();
+            assert_eq!(python_candidates.len(), 1);
+            assert_eq!(python_candidates[0].confidence, DetectionConfidence::High);
+        }
+        DetectionOutcome::NoMatch => panic!("expected matches"),
+    }
+}
+
+#[test]
+fn detect_project_empty_subdirs_no_match() {
+    let dir = unique_test_dir("empty-subdirs");
+    create_dir(&dir);
+    create_dir(&dir.join("a"));
+    create_dir(&dir.join("b"));
+
+    let outcome = detect_project(&dir).unwrap();
+
+    assert_eq!(outcome, DetectionOutcome::NoMatch);
+}
