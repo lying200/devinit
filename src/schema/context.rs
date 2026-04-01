@@ -3,9 +3,11 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ProjectContext {
-    pub language: Language,
+    pub languages: Vec<Language>,
+    // TODO: 尚未实现自动检测和交互式配置，当前始终为空
     // 项目依赖服务，如 pg、redis 等
     pub services: Vec<Service>,
+    // TODO: 尚未实现自动检测，当前始终为空
     // 项目依赖工具，如 git 等
     pub tools: Vec<String>,
 }
@@ -23,10 +25,41 @@ pub enum Language {
         #[serde(skip_serializing_if = "Option::is_none")]
         targets: Option<Vec<String>>,
     },
-    Python,
-    Go,
-    Java,
-    Nodejs,
+    Python {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        version: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        uv_enable: Option<bool>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        venv_enable: Option<bool>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        venv_quiet: Option<bool>,
+    },
+    Go {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        version: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package: Option<String>,
+    },
+    Java {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        jdk_package: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        gradle_enable: Option<bool>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        maven_enable: Option<bool>,
+    },
+    #[serde(rename = "javascript")]
+    JavaScript {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        package_manager: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        corepack_enable: Option<bool>,
+    },
 }
 
 #[derive(Debug, Clone, Serialize)]

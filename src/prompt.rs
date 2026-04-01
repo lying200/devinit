@@ -1,11 +1,233 @@
 use dialoguer::{Confirm, Input, MultiSelect, Select, theme::ColorfulTheme};
 
+use crate::cli::LanguageChoice;
+use crate::detection::LanguageCandidate;
+use crate::git_ignore::IgnoreMode;
 use crate::schema::Language;
 
-pub fn prompt_rust_config() -> Language {
+#[must_use]
+pub fn ignore_mode_from_selection(selection: usize) -> IgnoreMode {
+    match selection {
+        0 => IgnoreMode::None,
+        1 => IgnoreMode::GitIgnore,
+        2 => IgnoreMode::LocalExclude,
+        _ => unreachable!(),
+    }
+}
+
+/// Prompts the user to select a git ignore mode.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
+pub fn prompt_ignore_mode() -> IgnoreMode {
+    let options = vec![
+        "Do nothing",
+        "Add to .gitignore",
+        "Add to local git exclude (.git/info/exclude, ignore devenv mechanism locally)",
+    ];
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("How to handle git ignore for devenv files?")
+        .default(0)
+        .items(&options)
+        .interact()
+        .expect("select err");
+
+    ignore_mode_from_selection(selection)
+}
+
+/// Prompts the user to select one or more languages.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
+pub fn prompt_language_choices() -> Vec<LanguageChoice> {
+    let options = vec!["Rust", "Python", "Go", "Java", "JavaScript"];
+    loop {
+        let selections = MultiSelect::with_theme(&ColorfulTheme::default())
+            .with_prompt("Select language(s)")
+            .items(&options)
+            .interact()
+            .expect("select err");
+
+        if selections.is_empty() {
+            println!("please select at least one language");
+            continue;
+        }
+
+        return selections
+            .iter()
+            .map(|&i| match i {
+                0 => LanguageChoice::Rust,
+                1 => LanguageChoice::Python,
+                2 => LanguageChoice::Go,
+                3 => LanguageChoice::Java,
+                4 => LanguageChoice::JavaScript,
+                _ => unreachable!(),
+            })
+            .collect();
+    }
+}
+
+#[must_use]
+pub fn prompt_language_config(choice: LanguageChoice) -> Language {
+    match choice {
+        LanguageChoice::Rust => prompt_rust_config(),
+        LanguageChoice::Python => prompt_python_config(),
+        LanguageChoice::Go => prompt_go_config(),
+        LanguageChoice::Java => prompt_java_config(),
+        LanguageChoice::JavaScript => prompt_javascript_config(),
+    }
+}
+
+#[must_use]
+pub fn format_detected_summary(candidate: &LanguageCandidate) -> String {
+    let mut lines = vec![format!(
+        "detected language: {}",
+        detected_language_name(&candidate.language)
+    )];
+
+    if let Some(field_line) = detected_primary_field(candidate) {
+        lines.push(field_line);
+    }
+
+    for reason in &candidate.reasons {
+        lines.push(format!("- {reason}"));
+    }
+
+    lines.join("\n")
+}
+
+/// Displays detected languages and prompts the user to confirm selections.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
+pub fn confirm_detected_configs(candidates: &[LanguageCandidate]) -> Vec<usize> {
+    println!("\nProject analysis:");
+    for candidate in candidates {
+        let name = detected_language_name(&candidate.language);
+        let detail = detected_primary_field(candidate);
+        if let Some(d) = &detail {
+            println!("  {name} - {d}");
+        } else {
+            println!("  {name}");
+        }
+        for reason in &candidate.reasons {
+            println!("    - {reason}");
+        }
+    }
+    println!();
+
+    let labels: Vec<String> = candidates
+        .iter()
+        .map(|c| {
+            let name = detected_language_name(&c.language);
+            let detail = detected_primary_field(c).unwrap_or_default();
+            if detail.is_empty() {
+                name.to_string()
+            } else {
+                format!("{name} ({detail})")
+            }
+        })
+        .collect();
+    let defaults: Vec<bool> = vec![true; candidates.len()];
+
+    MultiSelect::with_theme(&ColorfulTheme::default())
+        .with_prompt("Use detected languages?")
+        .items(&labels)
+        .defaults(&defaults)
+        .interact()
+        .expect("interact err")
+}
+
+/// Prompts the user to optionally modify each detected language config.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
+pub fn prompt_modify_detected(languages: Vec<Language>) -> Vec<Language> {
+    let theme = ColorfulTheme::default();
+    languages
+        .into_iter()
+        .map(|lang| {
+            let name = detected_language_name(&lang);
+            let modify = Confirm::with_theme(&theme)
+                .with_prompt(format!("Modify {name} config?"))
+                .default(false)
+                .interact()
+                .expect("interact err");
+            if modify {
+                prompt_language_config(language_to_choice(&lang))
+            } else {
+                lang
+            }
+        })
+        .collect()
+}
+
+fn language_to_choice(language: &Language) -> LanguageChoice {
+    match language {
+        Language::Rust { .. } => LanguageChoice::Rust,
+        Language::Python { .. } => LanguageChoice::Python,
+        Language::Go { .. } => LanguageChoice::Go,
+        Language::Java { .. } => LanguageChoice::Java,
+        Language::JavaScript { .. } => LanguageChoice::JavaScript,
+    }
+}
+
+fn detected_language_name(language: &Language) -> &'static str {
+    match language {
+        Language::Rust { .. } => "Rust",
+        Language::Python { .. } => "Python",
+        Language::Go { .. } => "Go",
+        Language::Java { .. } => "Java",
+        Language::JavaScript { .. } => "JavaScript",
+    }
+}
+
+fn detected_primary_field(candidate: &LanguageCandidate) -> Option<String> {
+    match &candidate.language {
+        Language::Rust {
+            channel: Some(channel),
+            ..
+        } => Some(format!("detected channel: {channel}")),
+        Language::Rust {
+            version: Some(version),
+            ..
+        }
+        | Language::Python {
+            version: Some(version),
+            ..
+        }
+        | Language::Go {
+            version: Some(version),
+            ..
+        } => Some(format!("detected version: {version}")),
+        Language::Java {
+            gradle_enable: Some(true),
+            ..
+        } => Some("detected build tool: gradle".to_string()),
+        Language::Java {
+            maven_enable: Some(true),
+            ..
+        } => Some("detected build tool: maven".to_string()),
+        Language::JavaScript {
+            package_manager: Some(manager),
+            ..
+        } => Some(format!("detected package manager: {manager}")),
+        _ => None,
+    }
+}
+
+fn prompt_rust_config() -> Language {
     let theme = ColorfulTheme::default();
     let use_default = Confirm::with_theme(&theme)
-        .with_prompt("use default rust config?")
+        .with_prompt("Use default Rust config?")
         .default(true)
         .interact()
         .expect("interact err exit");
@@ -87,5 +309,222 @@ pub fn prompt_rust_config() -> Language {
         version,
         components,
         targets,
+    }
+}
+
+fn prompt_python_config() -> Language {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("Use default Python config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Language::Python {
+            version: None,
+            package: None,
+            uv_enable: None,
+            venv_enable: None,
+            venv_quiet: None,
+        };
+    }
+
+    let version_input: String = Input::with_theme(&theme)
+        .with_prompt("version")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let version = if version_input.is_empty() {
+        None
+    } else {
+        Some(version_input.trim().to_string())
+    };
+
+    let package_input: String = Input::with_theme(&theme)
+        .with_prompt("package")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let package = if package_input.is_empty() {
+        None
+    } else {
+        Some(package_input.trim().to_string())
+    };
+
+    let uv_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable uv?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+
+    let venv_enabled = Confirm::with_theme(&theme)
+        .with_prompt("enable venv?")
+        .default(false)
+        .interact()
+        .expect("interact err exit");
+    let venv_enable = Some(venv_enabled);
+
+    let venv_quiet = if venv_enabled {
+        Some(
+            Confirm::with_theme(&theme)
+                .with_prompt("quiet?")
+                .default(false)
+                .interact()
+                .expect("interact err exit"),
+        )
+    } else {
+        None
+    };
+
+    Language::Python {
+        version,
+        package,
+        uv_enable,
+        venv_enable,
+        venv_quiet,
+    }
+}
+
+fn prompt_go_config() -> Language {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("Use default Go config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Language::Go {
+            version: None,
+            package: None,
+        };
+    }
+
+    let version_input: String = Input::with_theme(&theme)
+        .with_prompt("version")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let version = if version_input.is_empty() {
+        None
+    } else {
+        Some(version_input.trim().to_string())
+    };
+
+    let package_input: String = Input::with_theme(&theme)
+        .with_prompt("package")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let package = if package_input.is_empty() {
+        None
+    } else {
+        Some(package_input.trim().to_string())
+    };
+
+    Language::Go { version, package }
+}
+
+fn prompt_java_config() -> Language {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("Use default Java config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: None,
+        };
+    }
+
+    let jdk_package_input: String = Input::with_theme(&theme)
+        .with_prompt("jdk package")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let jdk_package = if jdk_package_input.is_empty() {
+        None
+    } else {
+        Some(jdk_package_input.trim().to_string())
+    };
+
+    let gradle_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable gradle?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+
+    let maven_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable maven?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+
+    Language::Java {
+        jdk_package,
+        gradle_enable,
+        maven_enable,
+    }
+}
+
+fn prompt_javascript_config() -> Language {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("Use default JavaScript config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Language::JavaScript {
+            package: None,
+            package_manager: None,
+            corepack_enable: None,
+        };
+    }
+
+    let package_input: String = Input::with_theme(&theme)
+        .with_prompt("package")
+        .allow_empty(true)
+        .interact_text()
+        .unwrap();
+    let package = if package_input.is_empty() {
+        None
+    } else {
+        Some(package_input.trim().to_string())
+    };
+
+    let package_managers = vec!["none", "npm", "pnpm", "yarn", "bun"];
+    let package_manager_idx = Select::with_theme(&theme)
+        .with_prompt("package manager")
+        .default(0)
+        .items(&package_managers)
+        .interact()
+        .expect("interact err exit");
+    let package_manager = if package_manager_idx == 0 {
+        None
+    } else {
+        Some(package_managers[package_manager_idx].to_string())
+    };
+
+    let corepack_enable = Some(
+        Confirm::with_theme(&theme)
+            .with_prompt("enable corepack?")
+            .default(false)
+            .interact()
+            .expect("interact err exit"),
+    );
+
+    Language::JavaScript {
+        package,
+        package_manager,
+        corepack_enable,
     }
 }

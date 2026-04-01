@@ -6,34 +6,124 @@
     pkgs.{{ tool }}
     {%- endfor %}
   ];
+{%- for lang in project_ctx.languages %}
+{%- if lang.name == "rust" %}
 
-  {% if project_ctx.language.name == "rust" -%}
   languages.rust = {
     enable = true;
 
-    {%- if project_ctx.language.channel is defined %}
-    channel = "{{ project_ctx.language.channel }}";
+    {%- if lang.channel is defined %}
+    channel = "{{ lang.channel }}";
     {%- endif %}
 
-    {%- if project_ctx.language.version is defined %}
-    version = "{{ project_ctx.language.version }}";
+    {%- if lang.version is defined %}
+    version = "{{ lang.version }}";
     {%- endif %}
 
-    {%- if project_ctx.language.components is defined %}
+    {%- if lang.components is defined %}
     components = [
-      {%- for component in project_ctx.language.components %}
+      {%- for component in lang.components %}
       "{{ component }}"
       {%- endfor %}
     ];
     {%- endif %}
 
-    {%- if project_ctx.language.targets is defined %}
+    {%- if lang.targets is defined %}
     targets = [
-      {%- for target in project_ctx.language.targets %}
+      {%- for target in lang.targets %}
       "{{ target }}"
       {%- endfor %}
     ];
     {%- endif %}
   };
-  {%- endif %}
+{%- endif %}
+{%- if lang.name == "python" %}
+
+  languages.python = {
+    enable = true;
+
+    {%- if lang.version is defined %}
+    version = "{{ lang.version }}";
+    {%- endif %}
+
+    {%- if lang.package is defined %}
+    package = {{ lang.package }};
+    {%- endif %}
+
+    {%- if lang.uv_enable is defined %}
+    uv.enable = {{ lang.uv_enable }};
+    {%- endif %}
+
+    {%- if lang.venv_enable is defined %}
+    venv.enable = {{ lang.venv_enable }};
+    {%- endif %}
+
+    {%- if lang.venv_quiet is defined %}
+    venv.quiet = {{ lang.venv_quiet }};
+    {%- endif %}
+  };
+{%- endif %}
+{%- if lang.name == "go" %}
+
+  languages.go = {
+    enable = true;
+
+    {%- if lang.version is defined %}
+    version = "{{ lang.version }}";
+    {%- endif %}
+
+    {%- if lang.package is defined %}
+    package = {{ lang.package }};
+    {%- endif %}
+  };
+{%- endif %}
+{%- if lang.name == "java" %}
+
+  languages.java = {
+    enable = true;
+
+    {%- if lang.jdk_package is defined %}
+    jdk.package = {{ lang.jdk_package }};
+    {%- endif %}
+
+    {%- if lang.gradle_enable is defined %}
+    gradle.enable = {{ lang.gradle_enable }};
+    {%- endif %}
+
+    {%- if lang.maven_enable is defined %}
+    maven.enable = {{ lang.maven_enable }};
+    {%- endif %}
+  };
+{%- endif %}
+{%- if lang.name == "javascript" %}
+
+  languages.javascript = {
+    enable = true;
+
+    {%- if lang.package is defined %}
+    package = {{ lang.package }};
+    {%- endif %}
+
+    {%- if lang.package_manager is defined and lang.package_manager == "npm" %}
+    npm.enable = true;
+    {%- endif %}
+
+    {%- if lang.package_manager is defined and lang.package_manager == "pnpm" %}
+    pnpm.enable = true;
+    {%- endif %}
+
+    {%- if lang.package_manager is defined and lang.package_manager == "yarn" %}
+    yarn.enable = true;
+    {%- endif %}
+
+    {%- if lang.corepack_enable is defined %}
+    corepack.enable = {{ lang.corepack_enable }};
+    {%- endif %}
+
+    {%- if lang.package_manager is defined and lang.package_manager == "bun" %}
+    bun.enable = true;
+    {%- endif %}
+  };
+{%- endif %}
+{%- endfor %}
 }

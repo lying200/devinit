@@ -1,10 +1,29 @@
 inputs:
   nixpkgs:
     url: github:cachix/devenv-nixpkgs/rolling
-  {% if project_ctx.language.name == "rust" %}
+{%- for lang in project_ctx.languages %}
+{%- if lang.name == "rust" %}
+
   rust-overlay:
     url: github:oxalica/rust-overlay
     inputs:
       nixpkgs:
         follows: nixpkgs
-  {% endif %}
+{%- endif %}
+{%- if lang.name == "python" and lang.version is defined %}
+
+  nixpkgs-python:
+    url: github:cachix/nixpkgs-python
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
+{%- endif %}
+{%- if lang.name == "go" and lang.version is defined %}
+
+  go-overlay:
+    url: github:purpleclay/go-overlay
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
+{%- endif %}
+{%- endfor %}
