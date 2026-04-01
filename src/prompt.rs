@@ -1,9 +1,9 @@
 use dialoguer::{Confirm, Input, MultiSelect, Select, theme::ColorfulTheme};
 
-use crate::cli::LanguageChoice;
-use crate::detection::LanguageCandidate;
+use crate::cli::{LanguageChoice, ServiceChoice};
+use crate::detection::{LanguageCandidate, ServiceCandidate};
 use crate::git_ignore::IgnoreMode;
-use crate::schema::Language;
+use crate::schema::{Language, Service};
 
 #[must_use]
 pub fn ignore_mode_from_selection(selection: usize) -> IgnoreMode {
@@ -527,4 +527,136 @@ fn prompt_javascript_config() -> Language {
         package_manager,
         corepack_enable,
     }
+}
+
+/// Prompts the user to select services.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
+pub fn prompt_service_choices() -> Vec<ServiceChoice> {
+    let options = vec!["PostgreSQL", "Redis", "MySQL"];
+    let selections = MultiSelect::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select services (optional, press Enter to skip)")
+        .items(&options)
+        .interact()
+        .expect("select err");
+
+    selections
+        .iter()
+        .map(|&i| match i {
+            0 => ServiceChoice::Postgres,
+            1 => ServiceChoice::Redis,
+            2 => ServiceChoice::Mysql,
+            _ => unreachable!(),
+        })
+        .collect()
+}
+
+#[must_use]
+pub fn prompt_service_config(choice: ServiceChoice) -> Service {
+    match choice {
+        ServiceChoice::Postgres => prompt_postgres_config(),
+        ServiceChoice::Redis => Service::Redis,
+        ServiceChoice::Mysql => prompt_mysql_config(),
+    }
+}
+
+/// Displays detected services and prompts the user to confirm selections.
+///
+/// # Panics
+///
+/// Panics if the terminal interaction fails.
+#[must_use]
+pub fn confirm_detected_services(candidates: &[ServiceCandidate]) -> Vec<usize> {
+    println!("\nDetected services:");
+    for candidate in candidates {
+        let name = service_display_name(&candidate.service);
+        for reason in &candidate.reasons {
+            println!("  {name} - {reason}");
+        }
+    }
+    println!();
+
+    let labels: Vec<String> = candidates
+        .iter()
+        .map(|c| service_display_name(&c.service).to_string())
+        .collect();
+    let defaults: Vec<bool> = vec![true; candidates.len()];
+
+    MultiSelect::with_theme(&ColorfulTheme::default())
+        .with_prompt("Use detected services?")
+        .items(&labels)
+        .defaults(&defaults)
+        .interact()
+        .expect("interact err")
+}
+
+fn service_display_name(service: &Service) -> &'static str {
+    match service {
+        Service::Postgres { .. } => "PostgreSQL",
+        Service::Redis => "Redis",
+        Service::Mysql { .. } => "MySQL",
+    }
+}
+
+fn prompt_postgres_config() -> Service {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("Use default PostgreSQL config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Service::Postgres { package: None };
+    }
+
+    let packages = vec![
+        "default",
+        "pkgs.postgresql_14",
+        "pkgs.postgresql_15",
+        "pkgs.postgresql_16",
+        "pkgs.postgresql_17",
+    ];
+    let pkg_idx = Select::with_theme(&theme)
+        .with_prompt("PostgreSQL package")
+        .default(0)
+        .items(&packages)
+        .interact()
+        .expect("interact err exit");
+    let package = if pkg_idx == 0 {
+        None
+    } else {
+        Some(packages[pkg_idx].to_string())
+    };
+
+    Service::Postgres { package }
+}
+
+fn prompt_mysql_config() -> Service {
+    let theme = ColorfulTheme::default();
+    let use_default = Confirm::with_theme(&theme)
+        .with_prompt("Use default MySQL config?")
+        .default(true)
+        .interact()
+        .expect("interact err exit");
+    if use_default {
+        return Service::Mysql { package: None };
+    }
+
+    let packages = vec!["default (MariaDB)", "pkgs.mysql80"];
+    let pkg_idx = Select::with_theme(&theme)
+        .with_prompt("MySQL package")
+        .default(0)
+        .items(&packages)
+        .interact()
+        .expect("interact err exit");
+    let package = if pkg_idx == 0 {
+        None
+    } else {
+        Some(packages[pkg_idx].to_string())
+    };
+
+    Service::Mysql { package }
 }

@@ -10,8 +10,13 @@ use clap::{Parser, ValueEnum};
     long_about = "Automatically detect project languages and generate devenv.nix, devenv.yaml, and .envrc configuration files."
 )]
 pub struct Cli {
+    /// Languages to configure (comma-separated)
     #[arg(short, long, value_delimiter = ',')]
     pub lang: Vec<LanguageChoice>,
+
+    /// Services to enable (comma-separated)
+    #[arg(short, long, value_delimiter = ',')]
+    pub service: Vec<ServiceChoice>,
 
     /// Non-interactive mode: accept detected config and use defaults
     #[arg(short, long)]
@@ -33,6 +38,25 @@ pub enum LanguageChoice {
     Java,
     #[value(name = "javascript")]
     JavaScript,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
+pub enum ServiceChoice {
+    Postgres,
+    Redis,
+    Mysql,
+}
+
+impl ServiceChoice {
+    #[must_use]
+    pub fn to_default_service(self) -> crate::schema::Service {
+        use crate::schema::Service;
+        match self {
+            ServiceChoice::Postgres => Service::Postgres { package: None },
+            ServiceChoice::Redis => Service::Redis,
+            ServiceChoice::Mysql => Service::Mysql { package: None },
+        }
+    }
 }
 
 impl LanguageChoice {

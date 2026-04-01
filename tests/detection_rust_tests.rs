@@ -196,3 +196,23 @@ fn rust_detector_reads_channel_from_rust_toolchain_toml() {
         })
     );
 }
+
+#[test]
+fn rust_detector_ignores_commented_channel() {
+    let dir = unique_test_dir("commented-channel");
+    create_dir(&dir);
+    fs::write(dir.join("Cargo.toml"), "[package]\nname = \"demo\"\n").unwrap();
+    fs::write(
+        dir.join("rust-toolchain.toml"),
+        "[toolchain]\n# channel = \"nightly\"\nchannel = \"stable\"\n",
+    )
+    .unwrap();
+
+    let result = detect(&dir).unwrap().unwrap();
+    match result.language {
+        Language::Rust { channel, .. } => {
+            assert_eq!(channel, Some("stable".to_string()));
+        }
+        _ => panic!("expected Rust"),
+    }
+}

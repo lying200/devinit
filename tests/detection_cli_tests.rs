@@ -1,4 +1,4 @@
-use devinit::cli::LanguageChoice;
+use devinit::cli::{LanguageChoice, ServiceChoice};
 use devinit::detection::{DetectionConfidence, DetectionOutcome, LanguageCandidate};
 use devinit::prompt::format_detected_summary;
 use devinit::resolution::{ResolutionPlan, plan_language_resolution};
@@ -190,4 +190,31 @@ fn to_default_language_returns_all_none_fields() {
             }
         }
     }
+}
+
+#[test]
+fn service_choice_to_default_service() {
+    use devinit::schema::Service;
+
+    let pg = ServiceChoice::Postgres.to_default_service();
+    assert_eq!(pg, Service::Postgres { package: None });
+
+    let redis = ServiceChoice::Redis.to_default_service();
+    assert_eq!(redis, Service::Redis);
+
+    let mysql = ServiceChoice::Mysql.to_default_service();
+    assert_eq!(mysql, Service::Mysql { package: None });
+}
+
+#[test]
+fn service_choice_dedup_via_sort() {
+    let mut choices = vec![
+        ServiceChoice::Redis,
+        ServiceChoice::Postgres,
+        ServiceChoice::Redis,
+        ServiceChoice::Postgres,
+    ];
+    choices.sort();
+    choices.dedup();
+    assert_eq!(choices.len(), 2);
 }

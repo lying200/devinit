@@ -53,7 +53,7 @@ fn detect_in_dir(dir: &Path, candidates: &mut Vec<LanguageCandidate>) -> io::Res
     Ok(())
 }
 
-fn scannable_dirs(target_dir: &Path) -> io::Result<Vec<PathBuf>> {
+pub(crate) fn scannable_dirs(target_dir: &Path) -> io::Result<Vec<PathBuf>> {
     let mut dirs = vec![target_dir.to_path_buf()];
 
     for entry in fs::read_dir(target_dir)? {

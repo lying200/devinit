@@ -126,4 +126,29 @@
   };
 {%- endif %}
 {%- endfor %}
+{%- for svc in project_ctx.services %}
+{%- if svc.name == "postgres" %}
+
+  services.postgres = {
+    enable = true;
+    listen_addresses = "127.0.0.1";
+    {%- if svc.package is defined %}
+    package = {{ svc.package }};
+    {%- endif %}
+  };
+{%- endif %}
+{%- if svc.name == "redis" %}
+
+  services.redis.enable = true;
+{%- endif %}
+{%- if svc.name == "mysql" %}
+
+  services.mysql = {
+    enable = true;
+    {%- if svc.package is defined %}
+    package = {{ svc.package }};
+    {%- endif %}
+  };
+{%- endif %}
+{%- endfor %}
 }
