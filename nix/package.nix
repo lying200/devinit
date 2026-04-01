@@ -5,10 +5,12 @@
   git,
 }:
 
+let
+  cargoToml = builtins.fromTOML (builtins.readFile ../Cargo.toml);
+in
 rustPlatform.buildRustPackage {
-  pname = "devinit";
-  # Keep in sync with Cargo.toml
-  version = "0.1.0";
+  pname = cargoToml.package.name;
+  inherit (cargoToml.package) version;
 
   src = lib.cleanSource ../.;
 

@@ -1,42 +1,57 @@
 {
-  description = "devinit flake package";
+  description = "devinit – generate devenv files for development projects";
 
   inputs = {
-    flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   outputs =
+    { self, nixpkgs }:
+    let
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+    in
     {
-      self,
-      flake-utils,
-      nixpkgs,
-    }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        package = pkgs.callPackage ./nix/package.nix { };
-      in
-      {
-        packages = {
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          package = pkgs.callPackage ./nix/package.nix { };
+        in
+        {
           default = package;
           devinit = package;
-        };
+        }
+      );
 
-        apps.default = flake-utils.lib.mkApp { drv = package; };
-
-        devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
-            cargo
-            clippy
-            git
-            nixfmt
-            rust-analyzer
-            rustc
-            rustfmt
-          ];
+      apps = forAllSystems (system: {
+        default = {
+          type = "app";
+          program = "${self.packages.${system}.devinit}/bin/devinit";
         };
-      }
-    );
+      });
+
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              cargo
+              clippy
+              git
+              nixfmt-rfc-style
+              rust-analyzer
+              rustc
+              rustfmt
+            ];
+          };
+        }
+      );
+    };
 }
