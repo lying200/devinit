@@ -2,6 +2,8 @@
 
 自动检测项目语言并生成 [devenv](https://devenv.sh) 开发环境配置。
 
+[English](README_EN.md)
+
 ## 功能
 
 - 5 种语言支持：Rust、Python、Go、Java、JavaScript
