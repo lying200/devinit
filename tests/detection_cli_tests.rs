@@ -207,6 +207,85 @@ fn service_choice_to_default_service() {
 }
 
 #[test]
+fn detected_summary_java_with_jdk_and_gradle() {
+    let candidate = LanguageCandidate {
+        language: Language::Java {
+            jdk_package: Some("pkgs.jdk21".to_string()),
+            gradle_enable: Some(true),
+            maven_enable: None,
+        },
+        confidence: DetectionConfidence::High,
+        reasons: vec!["found build.gradle".to_string()],
+    };
+    let summary = format_detected_summary(&candidate);
+    assert!(summary.contains("detected JDK 21, gradle"));
+}
+
+#[test]
+fn detected_summary_java_with_jdk_and_maven() {
+    let candidate = LanguageCandidate {
+        language: Language::Java {
+            jdk_package: Some("pkgs.jdk17".to_string()),
+            gradle_enable: None,
+            maven_enable: Some(true),
+        },
+        confidence: DetectionConfidence::High,
+        reasons: vec!["found pom.xml".to_string()],
+    };
+    let summary = format_detected_summary(&candidate);
+    assert!(summary.contains("detected JDK 17, maven"));
+}
+
+#[test]
+fn detected_summary_java_with_jdk_only() {
+    let candidate = LanguageCandidate {
+        language: Language::Java {
+            jdk_package: Some("pkgs.jdk25".to_string()),
+            gradle_enable: None,
+            maven_enable: None,
+        },
+        confidence: DetectionConfidence::High,
+        reasons: vec!["found build.gradle".to_string()],
+    };
+    let summary = format_detected_summary(&candidate);
+    assert!(summary.contains("detected JDK 25"));
+    // The primary field line should not mention build tools
+    // (reasons may contain "gradle" from file names, that's fine)
+    assert!(!summary.contains("detected JDK 25, gradle"));
+    assert!(!summary.contains("detected JDK 25, maven"));
+}
+
+#[test]
+fn detected_summary_java_gradle_only_no_jdk() {
+    let candidate = LanguageCandidate {
+        language: Language::Java {
+            jdk_package: None,
+            gradle_enable: Some(true),
+            maven_enable: None,
+        },
+        confidence: DetectionConfidence::High,
+        reasons: vec!["found build.gradle".to_string()],
+    };
+    let summary = format_detected_summary(&candidate);
+    assert!(summary.contains("detected build tool: gradle"));
+}
+
+#[test]
+fn detected_summary_java_maven_only_no_jdk() {
+    let candidate = LanguageCandidate {
+        language: Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: Some(true),
+        },
+        confidence: DetectionConfidence::High,
+        reasons: vec!["found pom.xml".to_string()],
+    };
+    let summary = format_detected_summary(&candidate);
+    assert!(summary.contains("detected build tool: maven"));
+}
+
+#[test]
 fn service_choice_dedup_via_sort() {
     let mut choices = vec![
         ServiceChoice::Redis,

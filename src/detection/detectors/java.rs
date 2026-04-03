@@ -13,15 +13,15 @@ pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
     let gradle = target_dir.join("build.gradle");
     let gradle_kts = target_dir.join("build.gradle.kts");
 
-    let maven_enable = pom.exists().then_some(true);
-    let gradle_enable = (gradle.exists() || gradle_kts.exists()).then_some(true);
+    let has_maven = pom.exists();
+    let has_gradle = gradle.exists() || gradle_kts.exists();
 
-    if maven_enable.is_none() && gradle_enable.is_none() {
+    if !has_maven && !has_gradle {
         return Ok(None);
     }
 
     let mut reasons = Vec::new();
-    if pom.exists() {
+    if has_maven {
         reasons.push("found pom.xml".to_string());
     }
     if gradle.exists() {
@@ -30,6 +30,27 @@ pub fn detect(target_dir: &Path) -> io::Result<Option<LanguageCandidate>> {
     if gradle_kts.exists() {
         reasons.push("found build.gradle.kts".to_string());
     }
+
+    // Detect gradle wrapper
+    let has_gradlew = target_dir.join("gradlew").exists()
+        || target_dir.join("gradlew.bat").exists();
+    if has_gradlew {
+        reasons.push("found gradlew (wrapper, system gradle not needed)".to_string());
+    }
+
+    // Build tool: mutually exclusive, prefer gradle over maven.
+    // If gradle wrapper exists, don't enable system gradle.
+    let (gradle_enable, maven_enable) = if has_gradle {
+        if has_gradlew {
+            (None, None) // wrapper handles gradle, no system gradle needed
+        } else {
+            (Some(true), None) // system gradle, no maven
+        }
+    } else if has_maven {
+        (None, Some(true))
+    } else {
+        (None, None)
+    };
 
     let jdk_package = detect_jdk_package(target_dir)?;
 
