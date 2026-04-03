@@ -348,6 +348,7 @@ fn prompt_python_config() -> Language {
         };
     }
 
+    println!("Fetching available Python versions...");
     let fetched = version_fetch::fetch_python_versions();
     let mut version_options: Vec<String> = vec!["default".to_string()];
     version_options.extend(fetched);
@@ -414,6 +415,7 @@ fn prompt_go_config() -> Language {
         };
     }
 
+    println!("Fetching available Go versions...");
     let fetched = version_fetch::fetch_go_versions();
     let mut version_options: Vec<String> = vec!["default".to_string()];
     version_options.extend(fetched);
@@ -451,6 +453,7 @@ fn prompt_java_config() -> Language {
         };
     }
 
+    println!("Fetching available JDK versions...");
     let fetched = version_fetch::fetch_jdk_versions();
     let mut jdk_options: Vec<String> = vec!["default".to_string()];
     jdk_options.extend(fetched);
@@ -502,6 +505,7 @@ fn prompt_javascript_config() -> Language {
         };
     }
 
+    println!("Fetching available Node.js versions...");
     let fetched = version_fetch::fetch_node_versions();
     let mut node_options: Vec<String> = vec!["default".to_string()];
     node_options.extend(fetched);

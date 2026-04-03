@@ -1,5 +1,6 @@
 use std::{
     fs,
+    ops::Deref,
     path::{Path, PathBuf},
     time::{SystemTime, UNIX_EPOCH},
 };
@@ -8,23 +9,38 @@ use devinit::detection::detectors::java::detect;
 use devinit::detection::{DetectionConfidence, LanguageCandidate};
 use devinit::schema::Language;
 
-fn unique_test_dir(name: &str) -> PathBuf {
-    let pid = std::process::id();
-    let nanos = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_nanos();
-    std::env::temp_dir().join(format!("devinit-java-detect-{name}-{pid}-{nanos}"))
+struct TestDir(PathBuf);
+
+impl TestDir {
+    fn new(name: &str) -> Self {
+        let pid = std::process::id();
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!("devinit-java-detect-{name}-{pid}-{nanos}"));
+        fs::create_dir_all(&path).unwrap();
+        Self(path)
+    }
 }
 
-fn create_dir(path: &Path) {
-    fs::create_dir_all(path).unwrap();
+impl Deref for TestDir {
+    type Target = Path;
+    fn deref(&self) -> &Path {
+        &self.0
+    }
+}
+
+impl Drop for TestDir {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.0);
+    }
 }
 
 #[test]
 fn java_detector_returns_none_without_java_signals() {
-    let dir = unique_test_dir("no-signals");
-    create_dir(&dir);
+    let dir = TestDir::new("no-signals");
+
 
     let result = detect(&dir).unwrap();
 
@@ -33,8 +49,8 @@ fn java_detector_returns_none_without_java_signals() {
 
 #[test]
 fn java_detector_detects_java_from_pom_xml() {
-    let dir = unique_test_dir("maven");
-    create_dir(&dir);
+    let dir = TestDir::new("maven");
+
     fs::write(dir.join("pom.xml"), "<project/>\n").unwrap();
 
     let result = detect(&dir).unwrap();
@@ -55,8 +71,8 @@ fn java_detector_detects_java_from_pom_xml() {
 
 #[test]
 fn java_detector_detects_java_from_gradle_file() {
-    let dir = unique_test_dir("gradle");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle");
+
     fs::write(dir.join("build.gradle"), "plugins {}\n").unwrap();
 
     let result = detect(&dir).unwrap();
@@ -77,8 +93,8 @@ fn java_detector_detects_java_from_gradle_file() {
 
 #[test]
 fn java_detector_reads_jdk_from_maven_release() {
-    let dir = unique_test_dir("maven-release");
-    create_dir(&dir);
+    let dir = TestDir::new("maven-release");
+
     let pom = r"<project><properties><maven.compiler.release>21</maven.compiler.release></properties></project>";
     fs::write(dir.join("pom.xml"), pom).unwrap();
 
@@ -100,8 +116,8 @@ fn java_detector_reads_jdk_from_maven_release() {
 
 #[test]
 fn java_detector_reads_jdk_from_maven_java_version() {
-    let dir = unique_test_dir("maven-java-version");
-    create_dir(&dir);
+    let dir = TestDir::new("maven-java-version");
+
     let pom = r"<project><properties><java.version>17</java.version></properties></project>";
     fs::write(dir.join("pom.xml"), pom).unwrap();
 
@@ -121,8 +137,8 @@ fn java_detector_reads_jdk_from_maven_java_version() {
 
 #[test]
 fn java_detector_prefers_first_direct_maven_tag() {
-    let dir = unique_test_dir("maven-multiple-tags");
-    create_dir(&dir);
+    let dir = TestDir::new("maven-multiple-tags");
+
     let pom = r"<project><properties><java.version>${foo}</java.version><java.version>21</java.version></properties></project>";
     fs::write(dir.join("pom.xml"), pom).unwrap();
 
@@ -142,8 +158,8 @@ fn java_detector_prefers_first_direct_maven_tag() {
 
 #[test]
 fn java_detector_ignores_commented_maven_versions() {
-    let dir = unique_test_dir("maven-commented");
-    create_dir(&dir);
+    let dir = TestDir::new("maven-commented");
+
     let pom =
         r"<project><properties><!-- <java.version>21</java.version> --></properties></project>";
     fs::write(dir.join("pom.xml"), pom).unwrap();
@@ -164,8 +180,8 @@ fn java_detector_ignores_commented_maven_versions() {
 
 #[test]
 fn java_detector_ignores_maven_interpolated_versions() {
-    let dir = unique_test_dir("maven-interpolated");
-    create_dir(&dir);
+    let dir = TestDir::new("maven-interpolated");
+
     let pom = r"<project><properties><maven.compiler.release>${jdk.version}</maven.compiler.release></properties></project>";
     fs::write(dir.join("pom.xml"), pom).unwrap();
 
@@ -185,8 +201,8 @@ fn java_detector_ignores_maven_interpolated_versions() {
 
 #[test]
 fn java_detector_reads_jdk_from_gradle_source_compatibility() {
-    let dir = unique_test_dir("gradle-source-compat");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-source-compat");
+
     let gradle = r"
 plugins {
     java
@@ -214,8 +230,8 @@ java {
 
 #[test]
 fn java_detector_reads_jdk_from_gradle_target_compatibility() {
-    let dir = unique_test_dir("gradle-target-compat");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-target-compat");
+
     let gradle = r"
 plugins {
     java
@@ -243,8 +259,8 @@ java {
 
 #[test]
 fn java_detector_ignores_source_target_substrings() {
-    let dir = unique_test_dir("gradle-substring");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-substring");
+
     let gradle = r"
 java {
     sourceCompatibilityExtra = JavaVersion.VERSION_21
@@ -269,8 +285,8 @@ java {
 
 #[test]
 fn java_detector_ignores_source_target_augmented_assignment() {
-    let dir = unique_test_dir("gradle-augmented");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-augmented");
+
     let gradle = r"
 java {
     sourceCompatibility += JavaVersion.VERSION_21
@@ -295,8 +311,8 @@ java {
 
 #[test]
 fn java_detector_reads_jdk_from_gradle_language_version() {
-    let dir = unique_test_dir("gradle-language-version");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-language-version");
+
     let gradle = r"
 java {
     languageVersion = JavaLanguageVersion.of(17)
@@ -320,8 +336,8 @@ java {
 
 #[test]
 fn java_detector_reads_jdk_from_gradle_kotlin_language_version() {
-    let dir = unique_test_dir("gradle-kotlin");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-kotlin");
+
     let gradle = r"
 java {
     toolchain {
@@ -347,8 +363,8 @@ java {
 
 #[test]
 fn java_detector_does_not_detect_ambiguous_gradle_versions() {
-    let dir = unique_test_dir("gradle-ambiguous");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-ambiguous");
+
     let gradle = r"
 java {
     sourceCompatibility = JavaVersion.VERSION_${project.version}
@@ -372,8 +388,8 @@ java {
 
 #[test]
 fn java_detector_ignores_gradle_variable_indirection() {
-    let dir = unique_test_dir("gradle-variable");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-variable");
+
     let gradle = r"
 def v = JavaVersion.VERSION_21
 java {
@@ -398,8 +414,8 @@ java {
 
 #[test]
 fn java_detector_ignores_gradle_patterns_in_comments_and_strings() {
-    let dir = unique_test_dir("gradle-comments-strings");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-comments-strings");
+
     let gradle = r#"
 // sourceCompatibility = JavaVersion.VERSION_21
 println("languageVersion = JavaLanguageVersion.of(21)")
@@ -426,8 +442,8 @@ java {
 
 #[test]
 fn java_detector_ignores_gradle_computed_expressions() {
-    let dir = unique_test_dir("gradle-computed");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-computed");
+
     let gradle = r"
 java {
     sourceCompatibility = JavaVersion.VERSION_21 + foo
@@ -453,8 +469,8 @@ java {
 
 #[test]
 fn java_detector_gradle_wrapper_disables_system_gradle() {
-    let dir = unique_test_dir("gradle-wrapper");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-wrapper");
+
     fs::write(dir.join("build.gradle"), "plugins {}\n").unwrap();
     fs::write(dir.join("gradlew"), "#!/bin/sh\n").unwrap();
 
@@ -475,8 +491,8 @@ fn java_detector_gradle_wrapper_disables_system_gradle() {
 
 #[test]
 fn java_detector_both_build_files_prefers_gradle() {
-    let dir = unique_test_dir("both-build-files");
-    create_dir(&dir);
+    let dir = TestDir::new("both-build-files");
+
     fs::write(dir.join("pom.xml"), "<project/>\n").unwrap();
     fs::write(dir.join("build.gradle"), "plugins {}\n").unwrap();
 
@@ -501,8 +517,8 @@ fn java_detector_both_build_files_prefers_gradle() {
 
 #[test]
 fn java_detector_both_build_files_with_wrapper() {
-    let dir = unique_test_dir("both-with-wrapper");
-    create_dir(&dir);
+    let dir = TestDir::new("both-with-wrapper");
+
     fs::write(dir.join("pom.xml"), "<project/>\n").unwrap();
     fs::write(dir.join("build.gradle"), "plugins {}\n").unwrap();
     fs::write(dir.join("gradlew.bat"), "@echo off\n").unwrap();
@@ -524,8 +540,8 @@ fn java_detector_both_build_files_with_wrapper() {
 
 #[test]
 fn java_detector_gradlew_bat_only_disables_system_gradle() {
-    let dir = unique_test_dir("gradlew-bat-only");
-    create_dir(&dir);
+    let dir = TestDir::new("gradlew-bat-only");
+
     fs::write(dir.join("build.gradle.kts"), "plugins {}\n").unwrap();
     fs::write(dir.join("gradlew.bat"), "@echo off\n").unwrap();
 
@@ -546,8 +562,8 @@ fn java_detector_gradlew_bat_only_disables_system_gradle() {
 
 #[test]
 fn java_detector_both_gradle_and_gradle_kts() {
-    let dir = unique_test_dir("gradle-and-kts");
-    create_dir(&dir);
+    let dir = TestDir::new("gradle-and-kts");
+
     fs::write(dir.join("build.gradle"), "plugins {}\n").unwrap();
     fs::write(dir.join("build.gradle.kts"), "plugins {}\n").unwrap();
 
