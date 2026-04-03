@@ -450,3 +450,121 @@ java {
         }
     );
 }
+
+#[test]
+fn java_detector_gradle_wrapper_disables_system_gradle() {
+    let dir = unique_test_dir("gradle-wrapper");
+    create_dir(&dir);
+    fs::write(dir.join("build.gradle"), "plugins {}\n").unwrap();
+    fs::write(dir.join("gradlew"), "#!/bin/sh\n").unwrap();
+
+    let candidate = detect(&dir)
+        .unwrap()
+        .expect("expected candidate since build file exists");
+
+    assert_eq!(
+        candidate.language,
+        Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: None,
+        }
+    );
+    assert!(candidate.reasons.iter().any(|r| r.contains("gradlew")));
+}
+
+#[test]
+fn java_detector_both_build_files_prefers_gradle() {
+    let dir = unique_test_dir("both-build-files");
+    create_dir(&dir);
+    fs::write(dir.join("pom.xml"), "<project/>\n").unwrap();
+    fs::write(dir.join("build.gradle"), "plugins {}\n").unwrap();
+
+    let candidate = detect(&dir)
+        .unwrap()
+        .expect("expected candidate since build files exist");
+
+    // Gradle takes priority, maven not enabled
+    assert_eq!(
+        candidate.language,
+        Language::Java {
+            jdk_package: None,
+            gradle_enable: Some(true),
+            maven_enable: None,
+        }
+    );
+    assert!(candidate.reasons.contains(&"found pom.xml".to_string()));
+    assert!(candidate
+        .reasons
+        .contains(&"found build.gradle".to_string()));
+}
+
+#[test]
+fn java_detector_both_build_files_with_wrapper() {
+    let dir = unique_test_dir("both-with-wrapper");
+    create_dir(&dir);
+    fs::write(dir.join("pom.xml"), "<project/>\n").unwrap();
+    fs::write(dir.join("build.gradle"), "plugins {}\n").unwrap();
+    fs::write(dir.join("gradlew.bat"), "@echo off\n").unwrap();
+
+    let candidate = detect(&dir)
+        .unwrap()
+        .expect("expected candidate since build files exist");
+
+    // Gradle wrapper present: no system gradle, and gradle takes priority so no maven either
+    assert_eq!(
+        candidate.language,
+        Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: None,
+        }
+    );
+}
+
+#[test]
+fn java_detector_gradlew_bat_only_disables_system_gradle() {
+    let dir = unique_test_dir("gradlew-bat-only");
+    create_dir(&dir);
+    fs::write(dir.join("build.gradle.kts"), "plugins {}\n").unwrap();
+    fs::write(dir.join("gradlew.bat"), "@echo off\n").unwrap();
+
+    let candidate = detect(&dir)
+        .unwrap()
+        .expect("expected candidate since build file exists");
+
+    assert_eq!(
+        candidate.language,
+        Language::Java {
+            jdk_package: None,
+            gradle_enable: None,
+            maven_enable: None,
+        }
+    );
+    assert!(candidate.reasons.iter().any(|r| r.contains("gradlew")));
+}
+
+#[test]
+fn java_detector_both_gradle_and_gradle_kts() {
+    let dir = unique_test_dir("gradle-and-kts");
+    create_dir(&dir);
+    fs::write(dir.join("build.gradle"), "plugins {}\n").unwrap();
+    fs::write(dir.join("build.gradle.kts"), "plugins {}\n").unwrap();
+
+    let candidate = detect(&dir)
+        .unwrap()
+        .expect("expected candidate since build files exist");
+
+    assert_eq!(
+        candidate.language,
+        Language::Java {
+            jdk_package: None,
+            gradle_enable: Some(true),
+            maven_enable: None,
+        }
+    );
+    assert!(candidate.reasons.contains(&"found build.gradle".to_string()));
+    assert!(candidate
+        .reasons
+        .contains(&"found build.gradle.kts".to_string()));
+}

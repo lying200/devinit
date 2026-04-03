@@ -6,3 +6,4 @@ pub mod init_guard;
 pub mod prompt;
 pub mod resolution;
 pub mod schema;
+pub mod version_fetch;

@@ -4,6 +4,7 @@ use crate::cli::{LanguageChoice, ServiceChoice};
 use crate::detection::{LanguageCandidate, ServiceCandidate};
 use crate::git_ignore::IgnoreMode;
 use crate::schema::{Language, Service};
+use crate::version_fetch;
 
 #[must_use]
 pub fn ignore_mode_from_selection(selection: usize) -> IgnoreMode {
@@ -209,6 +210,24 @@ fn detected_primary_field(candidate: &LanguageCandidate) -> Option<String> {
             ..
         } => Some(format!("detected version: {version}")),
         Language::Java {
+            jdk_package: Some(pkg),
+            gradle_enable,
+            maven_enable,
+            ..
+        } => {
+            let jdk_info = if let Some(ver) = pkg.strip_prefix("pkgs.jdk") {
+                format!("JDK {ver}")
+            } else {
+                pkg.clone()
+            };
+            let build_tool = match (gradle_enable, maven_enable) {
+                (Some(true), _) => ", gradle",
+                (_, Some(true)) => ", maven",
+                _ => "",
+            };
+            Some(format!("detected {jdk_info}{build_tool}"))
+        }
+        Language::Java {
             gradle_enable: Some(true),
             ..
         } => Some("detected build tool: gradle".to_string()),
@@ -329,26 +348,20 @@ fn prompt_python_config() -> Language {
         };
     }
 
-    let version_input: String = Input::with_theme(&theme)
-        .with_prompt("version")
-        .allow_empty(true)
-        .interact_text()
-        .unwrap();
-    let version = if version_input.is_empty() {
+    let fetched = version_fetch::fetch_python_versions();
+    let mut version_options: Vec<String> = vec!["default".to_string()];
+    version_options.extend(fetched);
+    let version_refs: Vec<&str> = version_options.iter().map(String::as_str).collect();
+    let ver_idx = Select::with_theme(&theme)
+        .with_prompt("Python version")
+        .default(0)
+        .items(&version_refs)
+        .interact()
+        .expect("interact err exit");
+    let version = if ver_idx == 0 {
         None
     } else {
-        Some(version_input.trim().to_string())
-    };
-
-    let package_input: String = Input::with_theme(&theme)
-        .with_prompt("package")
-        .allow_empty(true)
-        .interact_text()
-        .unwrap();
-    let package = if package_input.is_empty() {
-        None
-    } else {
-        Some(package_input.trim().to_string())
+        Some(version_options[ver_idx].clone())
     };
 
     let uv_enable = Some(
@@ -380,7 +393,7 @@ fn prompt_python_config() -> Language {
 
     Language::Python {
         version,
-        package,
+        package: None,
         uv_enable,
         venv_enable,
         venv_quiet,
@@ -401,29 +414,26 @@ fn prompt_go_config() -> Language {
         };
     }
 
-    let version_input: String = Input::with_theme(&theme)
-        .with_prompt("version")
-        .allow_empty(true)
-        .interact_text()
-        .unwrap();
-    let version = if version_input.is_empty() {
+    let fetched = version_fetch::fetch_go_versions();
+    let mut version_options: Vec<String> = vec!["default".to_string()];
+    version_options.extend(fetched);
+    let version_refs: Vec<&str> = version_options.iter().map(String::as_str).collect();
+    let ver_idx = Select::with_theme(&theme)
+        .with_prompt("Go version")
+        .default(0)
+        .items(&version_refs)
+        .interact()
+        .expect("interact err exit");
+    let version = if ver_idx == 0 {
         None
     } else {
-        Some(version_input.trim().to_string())
+        Some(version_options[ver_idx].clone())
     };
 
-    let package_input: String = Input::with_theme(&theme)
-        .with_prompt("package")
-        .allow_empty(true)
-        .interact_text()
-        .unwrap();
-    let package = if package_input.is_empty() {
-        None
-    } else {
-        Some(package_input.trim().to_string())
-    };
-
-    Language::Go { version, package }
+    Language::Go {
+        version,
+        package: None,
+    }
 }
 
 fn prompt_java_config() -> Language {
@@ -441,32 +451,34 @@ fn prompt_java_config() -> Language {
         };
     }
 
-    let jdk_package_input: String = Input::with_theme(&theme)
-        .with_prompt("jdk package")
-        .allow_empty(true)
-        .interact_text()
-        .unwrap();
-    let jdk_package = if jdk_package_input.is_empty() {
+    let fetched = version_fetch::fetch_jdk_versions();
+    let mut jdk_options: Vec<String> = vec!["default".to_string()];
+    jdk_options.extend(fetched);
+    let jdk_refs: Vec<&str> = jdk_options.iter().map(String::as_str).collect();
+    let jdk_idx = Select::with_theme(&theme)
+        .with_prompt("JDK version")
+        .default(0)
+        .items(&jdk_refs)
+        .interact()
+        .expect("interact err exit");
+    let jdk_package = if jdk_idx == 0 {
         None
     } else {
-        Some(jdk_package_input.trim().to_string())
+        Some(format!("pkgs.jdk{}", jdk_options[jdk_idx]))
     };
 
-    let gradle_enable = Some(
-        Confirm::with_theme(&theme)
-            .with_prompt("enable gradle?")
-            .default(false)
-            .interact()
-            .expect("interact err exit"),
-    );
-
-    let maven_enable = Some(
-        Confirm::with_theme(&theme)
-            .with_prompt("enable maven?")
-            .default(false)
-            .interact()
-            .expect("interact err exit"),
-    );
+    let build_tools = vec!["None", "Gradle", "Maven"];
+    let build_idx = Select::with_theme(&theme)
+        .with_prompt("Build tool")
+        .default(0)
+        .items(&build_tools)
+        .interact()
+        .expect("interact err exit");
+    let (gradle_enable, maven_enable) = match build_idx {
+        1 => (Some(true), None),
+        2 => (None, Some(true)),
+        _ => (None, None),
+    };
 
     Language::Java {
         jdk_package,
@@ -490,15 +502,20 @@ fn prompt_javascript_config() -> Language {
         };
     }
 
-    let package_input: String = Input::with_theme(&theme)
-        .with_prompt("package")
-        .allow_empty(true)
-        .interact_text()
-        .unwrap();
-    let package = if package_input.is_empty() {
+    let fetched = version_fetch::fetch_node_versions();
+    let mut node_options: Vec<String> = vec!["default".to_string()];
+    node_options.extend(fetched);
+    let node_refs: Vec<&str> = node_options.iter().map(String::as_str).collect();
+    let node_idx = Select::with_theme(&theme)
+        .with_prompt("Node.js version")
+        .default(0)
+        .items(&node_refs)
+        .interact()
+        .expect("interact err exit");
+    let package = if node_idx == 0 {
         None
     } else {
-        Some(package_input.trim().to_string())
+        Some(format!("pkgs.nodejs_{}", node_options[node_idx]))
     };
 
     let package_managers = vec!["none", "npm", "pnpm", "yarn", "bun"];
